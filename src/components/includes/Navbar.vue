@@ -1,6 +1,6 @@
 <template>
     <nav :class="['fixed top-0 left-0 w-full z-50 transition-shadow bg-white', { 'shadow-md': isSticky }]">
-        <div class="container mx-auto flex items-center justify-between py-3 px-4 md:px-0">
+        <div class="container mx-auto items-center justify-between py-3 px-4 md:px-0" style="display: flex;">
             <!-- Logo -->
             <a href="/" class="flex items-center">
                 <img :src="mainLogo" alt="Logo" class="h-12" />

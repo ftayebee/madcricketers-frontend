@@ -1,0 +1,9 @@
+.splide__arrow--next {
+    right: -3em!important;
+}
+.splide__arrow--prev {
+    left: -3em!important;
+}
+.splide__pagination{
+    bottom: -2em!important;
+}

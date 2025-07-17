@@ -151,7 +151,7 @@
   margin-inline-start: var(--swiper-centered-offset-before)
 }
 
-.swiper-css-mode.swiper-centered.swiper-horizontal>.swiper-wrapper: before {
+.swiper-css-mode.swiper-centered.swiper-horizontal>.swiper-wrapper:before {
   height: 100%;
   min-height: 1px;
   width: var(--swiper-centered-offset-after)
@@ -161,7 +161,7 @@
   margin-block-start: var(--swiper-centered-offset-before)
 }
 
-.swiper-css-mode.swiper-centered.swiper-vertical>.swiper-wrapper: before {
+.swiper-css-mode.swiper-centered.swiper-vertical>.swiper-wrapper:before {
   width: 100%;
   min-width: 1px;
   height: var(--swiper-centered-offset-after)
@@ -15071,7 +15071,7 @@ html {
   display: block;
   width: 25%;
   height: 25%;
-  background-color: #f58967;
+  background-color: #89AC46;
   border-radius: 100%;
   animation: sk-chase-dot-before 2s infinite ease-in-out both
 }
@@ -15264,13 +15264,13 @@ a.text-custom:hover {
 .icon-bg {
   height: 40px;
   width: 40px;
-  background-color: #f589671a
+  background-color: #89AC461a
 }
 
 .icon-lg {
   height: 50px;
   width: 50px;
-  background-color: #f589671a
+  background-color: #89AC461a
 }
 
 .img-part:after {
@@ -15280,7 +15280,7 @@ a.text-custom:hover {
   height: 300px;
   width: 300px;
   bottom: 75%;
-  background-color: #f5896766;
+  background-color: #89AC4666;
   margin: 0 auto;
   border-radius: 50%;
   -webkit-transform: translateY(50%);
@@ -15297,8 +15297,8 @@ a.text-custom:hover {
 }
 
 .form-check-input:checked {
-  background-color: #f58967;
-  border-color: #f58967
+  background-color: #89AC46;
+  border-color: #89AC46
 }
 
 .form-check-input:focus {
@@ -15329,9 +15329,9 @@ a.text-custom:hover {
 }
 
 .btn.btn-primary {
-  background-color: #f58967 !important;
-  border: 1px solid #f58967 !important;
-  border-bottom: 3px solid rgb(243.4259259259, 118.4259259259, 79.0740740741) !important;
+  background-color: #89AC46 !important;
+  border: 1px solid #89AC46 !important;
+  border-bottom: 3px solid #89AC46 !important;
   color: #fff !important
 }
 
@@ -15346,8 +15346,8 @@ a.text-custom:hover {
 }
 
 .btn.btn-outline-primary {
-  border: 1px solid #f58967 !important;
-  color: #f58967 !important
+  border: 1px solid #89AC46 !important;
+  color: #89AC46 !important
 }
 
 .btn.btn-secondary {
@@ -15373,7 +15373,7 @@ a.text-custom:hover {
 }
 
 .btn.btn-info {
-  background-color: #4bbbce !important;
+  background-color: #4bbbce!important;
   border: 1px solid #4bbbce !important;
   border-bottom: 3px solid rgb(54.9563318777, 179.4279475983, 200.5436681223) !important;
   color: #fff !important
@@ -15439,9 +15439,9 @@ a.text-custom:hover {
 }
 
 .btn.btn-danger {
-  background-color: #f58967 !important;
-  border: 1px solid #f58967 !important;
-  border-bottom: 3px solid rgb(243.4259259259, 118.4259259259, 79.0740740741) !important;
+  background-color: #89AC46 !important;
+  border: 1px solid #89AC46 !important;
+  border-bottom: 3px solid #89AC46 !important;
   color: #fff !important
 }
 
@@ -15456,8 +15456,8 @@ a.text-custom:hover {
 }
 
 .btn.btn-outline-danger {
-  border: 1px solid #f58967 !important;
-  color: #f58967 !important
+  border: 1px solid #89AC46 !important;
+  color: #89AC46 !important
 }
 
 .btn.btn-dark {
@@ -15531,7 +15531,7 @@ a.text-custom:hover {
   background-color: #fff;
   border: 1px solid #fff;
   border-bottom: 3px solid rgb(224.4, 224.4, 224.4) !important;
-  color: #f58967 !important
+  color: #89AC46 !important
 }
 
 .btn.btn-light:hover,
@@ -15604,34 +15604,34 @@ a.text-custom:hover {
 }
 
 .bg-primary {
-  background-color: #f58967 !important
+  background-color: #89AC46 !important
 }
 
 .text-primary {
-  color: #f58967 !important
+  color: #89AC46 !important
 }
 
 .btn-primary {
-  background-color: #f58967 !important
+  background-color: #89AC46 !important
 }
 
 .border-primary {
-  border-color: #f58967 !important
+  border-color: #89AC46 !important
 }
 
 .btn-outline-primary {
-  color: #f58967 !important;
-  border: 1px solid #f58967 !important
+  color: #89AC46 !important;
+  border: 1px solid #89AC46 !important
 }
 
 .btn-outline-primary:hover,
 .btn-outline-primary:active {
-  background-color: #f58967 !important;
+  background-color: #89AC46 !important;
   color: #f8f9fa !important
 }
 
 .btn-outline-primary:focus {
-  background-color: #f58967 !important;
+  background-color: #89AC46 !important;
   color: #f8f9fa !important
 }
 
@@ -15764,34 +15764,34 @@ a.text-custom:hover {
 }
 
 .bg-danger {
-  background-color: #f58967 !important
+  background-color: #89AC46 !important
 }
 
 .text-danger {
-  color: #f58967 !important
+  color: #89AC46 !important
 }
 
 .btn-danger {
-  background-color: #f58967 !important
+  background-color: #89AC46 !important
 }
 
 .border-danger {
-  border-color: #f58967 !important
+  border-color: #89AC46 !important
 }
 
 .btn-outline-danger {
-  color: #f58967 !important;
-  border: 1px solid #f58967 !important
+  color: #89AC46 !important;
+  border: 1px solid #89AC46 !important
 }
 
 .btn-outline-danger:hover,
 .btn-outline-danger:active {
-  background-color: #f58967 !important;
+  background-color: #89AC46 !important;
   color: #f8f9fa !important
 }
 
 .btn-outline-danger:focus {
-  background-color: #f58967 !important;
+  background-color: #89AC46 !important;
   color: #f8f9fa !important
 }
 
@@ -15914,7 +15914,7 @@ a.text-custom:hover {
 
 .navbar-custom .navbar-nav li a:hover,
 .navbar-custom .navbar-nav li a.active {
-  color: #f58967 !important
+  color: #89AC46 !important
 }
 
 .navbar-custom .navbar-nav .nav-link {
@@ -16137,7 +16137,7 @@ a.text-custom:hover {
 
 .demo-overlay {
   position: absolute;
-  background-image: linear-gradient(#fff0, #f5896766);
+  background-image: linear-gradient(#fff0, #89AC4666);
   left: 0;
   right: 0;
   top: 0;
@@ -16159,7 +16159,7 @@ a.text-custom:hover {
 
 .bg-overlay-3 {
   position: absolute;
-  background-image: linear-gradient(#fff0, #f58967b3);
+  background-image: linear-gradient(#fff0, #89AC46b3);
   top: 0;
   right: 0;
   left: 0;
@@ -16175,7 +16175,7 @@ a.text-custom:hover {
   height: 1px;
   left: 0;
   right: 0;
-  border-top: 2px dashed #f58967;
+  border-top: 2px dashed #89AC46;
   top: 14px;
   margin: 0 auto
 }
@@ -16236,7 +16236,7 @@ a.text-custom:hover {
 }
 
 .footer-part li a:hover {
-  color: #f58967 !important
+  color: #89AC46 !important
 }
 
 .footer-part .form-button form {
@@ -16487,7 +16487,7 @@ ul {
   left: 67%;
   bottom: 0;
   right: 0;
-  background-color: #f5896733
+  background-color: #89AC4633
 }
 
 .bg-home-agency .home-center {
@@ -16822,7 +16822,7 @@ ul {
   position: relative;
   background-size: cover;
   background-image: url(/assets/map-bg-CL9Hqwvl.png);
-  background-color: #f589670d;
+  background-color: #89AC460d;
   background-position: center;
   background-size: contain;
   background-repeat: no-repeat
@@ -16998,7 +16998,7 @@ ul {
 
 .bg-home-app {
   position: relative;
-  background-color: #f589670d;
+  background-color: #89AC460d;
   background-image: url(/assets/bg-img-5-hrCfBxXn.jpg);
   background-position: center;
   background-size: cover;
@@ -17108,7 +17108,7 @@ ul {
   width: 60px;
   height: 60px;
   line-height: 60px;
-  background: #f5896780;
+  background: #89AC4680;
   border-radius: 50%
 }
 
@@ -17231,7 +17231,7 @@ ul {
 .nav-sticky.navbar-custom .navbar-nav li a:hover,
 .nav-sticky.navbar-custom .navbar-nav li a:active,
 .busi-team-icons li a:hover {
-  color: #f58967
+  color: #89AC46
 }
 
 .bg-custom,
@@ -17244,7 +17244,7 @@ ul {
 .busi-container-filter li a.active,
 .footer-startup .footer-icons li a:hover,
 .app-team-social-icon a:hover {
-  background: #f58967
+  background: #89AC46
 }
 
 .btn-primary,
@@ -17260,23 +17260,23 @@ ul {
 .busi-container-filter li a:hover,
 .busi-container-filter li a.active,
 .app-team-social-icon a:hover {
-  border-color: #f58967
+  border-color: #89AC46
 }
 
 .app-border-right {
-  border-right: 3px solid #f58967
+  border-right: 3px solid #89AC46
 }
 
 .app-border-left {
-  border-left: 3px solid #f58967
+  border-left: 3px solid #89AC46
 }
 
 .arrow-right {
-  border-left: 14px solid #f58967
+  border-left: 14px solid #89AC46
 }
 
 .arrow-left {
-  border-right: 14px solid #f58967
+  border-right: 14px solid #89AC46
 }
 
 .startup-pricing-table-active {
@@ -17285,11 +17285,11 @@ ul {
 }
 
 .soft-team-content {
-  border-bottom: 2px solid #f58967
+  border-bottom: 2px solid #89AC46
 }
 
 .navbar-btn {
-  background-color: #f5896733
+  background-color: #89AC4633
 }
 
 .feautures-icon i,
@@ -17304,7 +17304,7 @@ ul {
 }
 
 .btn-primary {
-  border-bottom: 3px solid rgb(243.4259259259, 118.4259259259, 79.0740740741)
+  border-bottom: 3px solid #89AC46
 }
 
 .btn-primary:hover,
@@ -17319,5 +17319,6 @@ ul {
 }
 
 .spinner {
-  border-left: 5px solid #f58967
+  border-left: 5px solid #89AC46
 }
+
