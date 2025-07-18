@@ -1,12 +1,12 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Homepage from "../components/Homepage.vue";
-// import FeaturesPage from "@/views/FeaturesPage.vue";
-// import other pages as needed
+import Tournaments from "../components/pages/Tournaments.vue";
+import TournamentDetail from "../components/pages/TournamentDetail.vue";
 
 const routes = [
   { path: "/", component: Homepage },
-//   { path: "/features", component: FeaturesPage },
-  // add more routes here
+  { path: "/tournaments", component: Tournaments },
+  { path: "/tournaments/:slug", component: TournamentDetail },
 ];
 
 const router = createRouter({

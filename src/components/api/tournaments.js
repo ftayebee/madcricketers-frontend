@@ -10,3 +10,13 @@ export const fetchTournaments = async () => {
         return [];
     }
 };
+
+export const fetchTournamentBySlug = async (slug) => {
+    try {
+        const res = await apiClient.get(`${endpoints.tournaments}/${slug}`);
+        return res.data.data;
+    } catch (error) {
+        console.error(`Failed to load tournament with slug ${slug}:`, error);
+        return null;
+    }
+}

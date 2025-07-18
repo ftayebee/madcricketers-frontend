@@ -1,12 +1,12 @@
 <!-- src/components/MatchCard.vue -->
 <template>
     <div class="bg-white rounded-xl shadow-md">
-        <a class="block text-md font-semibold text-gray-800 mb-0 py-2 px-4 bg-gray-200 rounded-t-xl rounded-b-none"
-            href="#">
+        <router-link :to="`/tournaments/${match.tournament.slug}`"
+            class="block text-md font-semibold text-gray-800 mb-0 py-2 px-4 bg-gray-200 rounded-t-xl rounded-b-none">
             <span>{{ match.match_date }}</span>
             <span class="mx-2">|</span>
-            <span>{{ match.tournament }}</span>
-        </a>
+            <span>{{ match.tournament.name }}</span>
+        </router-link>
         <div class="p-4">
             <p class="text-sm font-semibold mb-3">{{ match.title }}, {{ match.venue }}</p>
             <div class="flex justify-between items-center mb-4">

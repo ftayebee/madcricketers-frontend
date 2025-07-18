@@ -42,8 +42,9 @@
                         <!-- table of completed matches -->
                         <div class="container mt-3">
                             <div class="table-responsive pt-3">
-                                <div v-if="completedMatches.value.length > 0">
-                                    <MatchRow v-for="match in completedMatches" :key="match.id" :match="match" />
+                                <div v-if="completedMatches.length > 0">
+                                    <MatchRow v-for="match in completedMatches.filter(m => m && m.team_a && m.team_b)"
+                                        :key="match.id" :match="match" />
                                 </div>
 
                                 <!-- Show alert if no matches -->
@@ -83,7 +84,8 @@
                             <div class="table-responsive pt-3">
                                 <!-- Check if completedMatches has data -->
                                 <div v-if="tournaments.length > 0">
-                                    <MatchRow v-for="tournament in tournaments" :key="tournament.id" :match="tournament" />
+                                    <TournamentCard v-for="tournament in tournaments" :key="tournament.id"
+                                        :tournament="tournament" />
                                 </div>
 
                                 <!-- Show alert if no matches -->
@@ -108,6 +110,7 @@ import { Splide, SplideSlide } from '@splidejs/vue-splide'
 import bgHome from './../assets/bg/bg-home.png'
 import { fetchLiveMatches, fetchCompletedMatches, fetchUpcomingMatches } from "./api/matches"
 import { fetchTournaments } from './api/tournaments';
+import TournamentCard from './includes/TournamentCard.vue'
 
 // Mock fetch functions (replace with real API later)
 const liveMatches = ref([]);
@@ -118,48 +121,10 @@ const tournaments = ref([]);
 onMounted(async () => {
     liveMatches.value = await fetchLiveMatches();
     upcomingMatches.value = await fetchUpcomingMatches();
-    completedMatches.value = await fetchCompletedMatches();
+    const fetchedCompleted = await fetchCompletedMatches();
+    completedMatches.value = fetchedCompleted.filter(
+        m => m && m.team_a && m.team_b
+    );
     tournaments.value = await fetchTournaments();
-
-    console.log(completedMatches.value)
 });
-
-// async function fetchLiveMatches() {
-//     try {
-//         const res = await axios.get('http://127.0.0.1:8000/api/tournaments')
-//         return res.data.data
-//     } catch (error) {
-//         console.error('Failed to load live matches:', error)
-//         return []
-//     }
-// }
-
-// async function fetchCompletedMatches() {
-//     try {
-//         const res = await axios.get('http://127.0.0.1:8000/api/completed-matches')
-//         return res.data.data
-//     } catch (error) {
-//         console.error('Failed to load completed matches:', error)
-//         return []
-//     }
-// }
-
-// function fetchUpcomingMatches() {
-//     return Promise.resolve([
-//         {
-//             id: 3,
-//             teamA: 'Bangladesh',
-//             teamB: 'Sri Lanka',
-//             startTime: '2025-07-20T14:00:00Z',
-//             status: 'Upcoming',
-//         },
-//         {
-//             id: 4,
-//             teamA: 'South Africa',
-//             teamB: 'New Zealand',
-//             startTime: '2025-07-21T10:00:00Z',
-//             status: 'Upcoming',
-//         },
-//     ])
-// }
 </script>
