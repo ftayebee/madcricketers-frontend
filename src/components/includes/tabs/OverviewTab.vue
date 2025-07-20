@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-white min-h-screen">
+    <div class="container bg-white min-h-screen">
         <div class="max-w-7xl mx-auto py-10 px-4 grid grid-cols-1 lg:grid-cols-3 gap-8">
 
             <!-- Main Content -->
@@ -52,20 +52,13 @@
 
             <!-- Sidebar -->
             <div class="space-y-8">
-                <!-- Key Stats -->
-                <div class="bg-gray-50 rounded-md p-4">
-                    <h4 class="text-lg font-semibold mb-3">Key Stats</h4>
-                    <div v-for="stat in keyStats" :key="stat.label" class="mb-4">
-                        <p class="text-sm font-semibold">{{ stat.label }}</p>
-                        <div class="flex items-center space-x-2 mt-1">
-                            <img :src="stat.player.image" class="w-8 h-8 rounded-full object-cover" />
-                            <div class="text-sm">
-                                <div>{{ stat.player.name }}</div>
-                                <div class="text-gray-500 text-xs">{{ stat.value }}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <h4 class="text-lg font-semibold mb-3">Key Stats</h4>
+                <template v-if="tournament.key_stats && tournament.key_stats.length">
+                    <KeyStat v-for="stat in tournament.key_stats" :key="stat.label" :stat="stat" :title="stat.label" class="mb-3"/>
+                </template>
+                <template v-else>
+                    <p class="text-gray-500 alert alert-info mt-0">No key stats available for this tournament.</p>
+                </template>
             </div>
 
         </div>
@@ -75,6 +68,7 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import MatchRow from './../MatchRow.vue'
+import KeyStat from './../../includes/KeyStat.vue'
 
 const props = defineProps({
     tournament: {
@@ -87,16 +81,11 @@ const pointGroups = ref([]);
 const pointsTable = ref({});
 const activeGroup = ref('');
 
-// When tournament prop is ready, populate point groups and table
 watch(() => props.tournament, (tournament) => {
     if (tournament && tournament.points_table) {
-        // Extract group names
         pointGroups.value = tournament.points_table.map(group => group.group_name);
-
-        // Set first group as active
         activeGroup.value = pointGroups.value[0] || '';
-
-        // Build pointsTable map
+        
         const table = {};
         tournament.points_table.forEach(group => {
             table[group.group_name] = group.teams.map(team => ({
@@ -111,28 +100,4 @@ watch(() => props.tournament, (tournament) => {
         pointsTable.value = table;
     }
 }, { immediate: true });
-
-// Sample fallback keyStats, in case needed
-const keyStats = [
-    {
-        label: 'Most Runs',
-        player: { name: 'U Saharan', image: '/players/usaharan.png' },
-        value: '397 Runs'
-    },
-    {
-        label: 'Most Wickets',
-        player: { name: 'K Maphaka', image: '/players/kmaphaka.png' },
-        value: '21 Wickets'
-    },
-    {
-        label: 'Most Sixes',
-        player: { name: 'S Stolk', image: '/players/stolk.png' },
-        value: '11 Sixes'
-    },
-    {
-        label: 'Best Strike Rate',
-        player: { name: 'S Stolk', image: '/players/stolk.png' },
-        value: '141.61'
-    }
-];
 </script>

@@ -26,7 +26,7 @@
             <OverviewTab v-if="activeTab === 'Overview'" :tournament="tournament" />
             <MatchesTab v-if="activeTab === 'Matches'" :tournament="tournament" />
             <SquadsTab v-if="activeTab === 'Squads'" :tournament="tournament" />
-            <PointsTableTab v-if="activeTab === 'Points Table'" :tournament="tournament"/>
+            <PointsTableTab v-if="activeTab === 'Points Table'" :tournament="tournament" />
         </div>
     </div>
 </template>
@@ -53,13 +53,13 @@ onMounted(async () => {
         console.error('Slug not found in route params')
         return
     }
-    
+
     tournament.value = await fetchTournamentBySlug(slug);
 
-    console.log('Tournament data:', tournament.value)
     if (!tournament.value) {
         console.error('Tournament not found for slug:', route.params.slug)
     }
+    console.log('Tournament Data:', tournament.value)
 })
 
 const formattedDate = computed(() => {
@@ -75,4 +75,3 @@ button {
     transition: all 0.2s ease;
 }
 </style>
-  

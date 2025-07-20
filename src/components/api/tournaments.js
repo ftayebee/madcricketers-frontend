@@ -3,7 +3,7 @@ import endpoints from './endpoints';
 
 export const fetchTournaments = async () => {
     try {
-        const res = await apiClient.get(endpoints.tournaments);
+        const res = await apiClient.get(endpoints.tournaments.all);
         return res.data.data;
     } catch (error) {
         console.error('Failed to load tournaments:', error);
@@ -13,7 +13,7 @@ export const fetchTournaments = async () => {
 
 export const fetchTournamentBySlug = async (slug) => {
     try {
-        const res = await apiClient.get(`${endpoints.tournaments}/${slug}`);
+        const res = await apiClient.get(endpoints.tournaments.detail(slug));
         return res.data.data;
     } catch (error) {
         console.error(`Failed to load tournament with slug ${slug}:`, error);
