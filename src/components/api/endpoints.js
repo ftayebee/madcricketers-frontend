@@ -5,6 +5,7 @@ export default {
         upcoming: "/matches/upcoming",
         live: "/matches/live",
         detail: (slug) => `/matches/detail/${slug}`,
+        teamInfo: (id) => `/matches/detail/team-info/${id}`,
     },
     tournaments: {
         all: "/tournaments",

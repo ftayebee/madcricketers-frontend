@@ -49,3 +49,13 @@ export const fetchMatchBySlug = async (slug) => {
         return null;
     }
 };
+
+export const fetchTeamInfo = async (id) => {
+    try {
+        const res = await apiClient.get(endpoints.matches.teamInfo(id));
+        return res.data;
+    } catch (error) {
+        console.error(`Failed to load team form ${id}:`, error);
+        return null;
+    }
+}
