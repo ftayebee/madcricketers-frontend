@@ -23,6 +23,7 @@ export default {
         all: "/players",
         detail: (slug) => `/players/detail/${slug}`,
         stats: (slug) => `/players/detail/${slug}/stats`,
+        registration: "/registration",
     },
     venues: {
         all: "/venues",

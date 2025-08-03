@@ -10,3 +10,13 @@ export const fetchPlayerDetail = async () => {
         return [];
     }
 };
+
+export const playerRegistration = async (data) => {
+    try {
+        const res = await apiClient.post(endpoints.players.registration, data);
+        return res.data;
+    } catch (error) {
+        console.error("Failed to register player:", error);
+        return null;
+    }
+}

@@ -15,12 +15,13 @@
                         active-class="text-blue-700">Players</router-link></li>
                 <li><router-link to="/teams" class="hover:text-blue-600 nav-link"
                         active-class="text-blue-700">Teams</router-link></li>
-                <li><router-link to="/team" class="hover:text-blue-600 nav-link" active-class="text-blue-700">Team</router-link>
+                <li>
+                    <router-link to="/team" class="hover:text-blue-600 nav-link"
+                        active-class="text-blue-700">Team</router-link>
                 </li>
             </ul>
 
-            <!-- Desktop Button -->
-            <button class="btn btn-sm btn-primary" type="button">Create Account</button>
+            <router-link to="/registration" class="btn btn-sm btn-primary" type="button">Create Account</router-link>
 
             <!-- Mobile Hamburger Button -->
             <button @click="toggleMenu" class="md:hidden focus:outline-none" aria-label="Toggle Menu">
