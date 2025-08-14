@@ -21,7 +21,10 @@
                 </li>
             </ul>
 
-            <router-link to="/registration" class="btn btn-sm btn-primary" type="button">Create Account</router-link>
+            <div>
+                <router-link to="/registration" class="btn btn-sm btn-primary" type="button">Registration</router-link>
+                <a href="https://app.madcricketers.com/" class="btn btn-sm btn-info ml-3" target="_blank">Login</a>
+            </div>
 
             <!-- Mobile Hamburger Button -->
             <button @click="toggleMenu" class="md:hidden focus:outline-none" aria-label="Toggle Menu">
