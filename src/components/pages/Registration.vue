@@ -90,8 +90,7 @@
 
                         <div>
                             <label class="block font-medium mb-1">Date of Birth</label>
-                            <input v-model="form.date_of_birth" type="date"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring" />
+                            <flat-pickr v-model="form.date_of_birth" :config="flatpickrConfig"></flat-pickr>
                         </div>
 
                         <div>
@@ -189,10 +188,18 @@ import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type'
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
 import { useToast } from "vue-toastification"
 import axios from 'axios'
+import flatPickr from 'vue-flatpickr-component';
+import 'flatpickr/dist/flatpickr.css';
 
 const toast = useToast()
 
-// Initialize FilePond with plugins
+const flatpickrConfig = {
+    enableTime: false,
+    dateFormat: "Y-m-d",
+    altInput: true,
+    altFormat: "F j, Y",
+};
+
 const FilePond = vueFilePond(
     FilePondPluginFileValidateType,
     FilePondPluginImagePreview
@@ -230,9 +237,8 @@ const handleFilePondAddFile = (error, file) => {
         toast.error(error.message)
         return
     }
-    
+
     fileObject.value = file.file
-    console.log('File added:', file.file)
 }
 
 const handleFilePondRemoveFile = () => {
@@ -288,7 +294,8 @@ const submitForm = async () => {
 .el-form-item {
     margin-bottom: 20px;
 }
+
 .filepond--root .filepond--credits {
-    display: none!important;
+    display: none !important;
 }
 </style>

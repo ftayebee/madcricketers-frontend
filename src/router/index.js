@@ -4,6 +4,7 @@ import Tournaments from "../components/pages/Tournaments.vue";
 import TournamentDetail from "../components/pages/TournamentDetail.vue";
 import MatchDetail from "../components/pages/MatchDetail.vue";
 import Registration from "../components/pages/Registration.vue";
+import Players from "../components/pages/Players.vue";
 
 const routes = [
   { path: "/", component: Homepage },
@@ -11,6 +12,7 @@ const routes = [
   { path: "/tournaments", component: Tournaments },
   { path: "/tournaments/:slug", component: TournamentDetail },
   { path: "/match/detail/:id", component: MatchDetail },
+  { path: "/players", component: Players },
   { path: "/:pathMatch(.*)*", redirect: "/", },
 ];
 

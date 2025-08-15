@@ -20,3 +20,13 @@ export const playerRegistration = async (data) => {
         return null;
     }
 }
+
+export const fetchPlayerList = async () => {
+    try {
+        const res = await apiClient.get(endpoints.players.all);
+        return res.data;
+    } catch (error) {
+        console.error("Failed to register player:", error);
+        return null;
+    }
+}

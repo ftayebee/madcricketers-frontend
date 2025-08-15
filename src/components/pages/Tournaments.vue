@@ -1,5 +1,5 @@
 <template>
-    <section id="home" class="bg-home bg-cover bg-center min-h-screen" :style="{ backgroundImage: `url(${bgHome})` }">
+    <section id="home" class="bg-home bg-cover bg-center" :style="{ backgroundImage: `url(${bgHome})` }">
         <div class="flex items-center justify-center py-24" style="padding-top: 7rem;">
             <div class="container mx-auto px-4">
                 <div class="flex flex-wrap -mx-4">
@@ -11,7 +11,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M9.75 6.75v10.5M14.25 6.75v10.5M4.5 8.25H19.5M6.75 4.5h10.5A2.25 2.25 0 0119.5 6.75v10.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 17.25V6.75A2.25 2.25 0 016.75 4.5z" />
                             </svg>
-                            All Tournaments
+                            Currently Running
                         </h5>
 
                         <!-- Loader -->
