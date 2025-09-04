@@ -1,6 +1,6 @@
 <template>
-    <section id="home" class="bg-home" :style="{ backgroundImage: `url(${bgHome})` }">
-        <div class="flex items-center justify-center py-24" style="padding-top: 7rem;">
+    <section id="home" class="bg-home py-24" :style="{ backgroundImage: `url(${bgHome})` }">
+        <div v-if="liveMatches.length > 0" class="flex items-center justify-center py-24" style="padding-top: 7rem;">
             <div class="container mx-auto px-4">
                 <div class="flex flex-wrap -mx-4">
                     <div class="w-full lg:w-12/12 px-4">
@@ -19,8 +19,20 @@
         </div>
     </section>
 
+    <section class="bg-white">
+        <div class="flex items-center justify-center py-2" v-if="boardMembers.length > 0">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-wrap -mx-4">
+                    <div class="w-full lg:w-12/12 px-4">
+                        <img :src="boardMembers" alt="Board Members" class="w-full h-full object-cover">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section id="home" class="bg-completed-matches bg-white-200">
-        <div class="flex items-center justify-center py-24">
+        <div class="flex items-center justify-center py-24" v-if="completedMatches.length > 0">
             <div class="container mx-auto px-4">
                 <div class="flex flex-wrap -mx-4">
                     <div class="w-full lg:w-12/12 px-4">
@@ -60,7 +72,7 @@
     </section>
 
     <section id="home" class="bg-tournaments bg-gray-200">
-        <div class="flex items-center justify-center py-24">
+        <div class="flex items-center justify-center py-24" v-if="tournaments.length > 0">
             <div class="container mx-auto px-4">
                 <div class="flex flex-wrap -mx-4">
                     <div class="w-full lg:w-12/12 px-4">
@@ -111,6 +123,7 @@ import bgHome from './../assets/bg/bg-home.png'
 import { fetchLiveMatches, fetchCompletedMatches, fetchUpcomingMatches } from "./api/matches"
 import { fetchTournaments } from './api/tournaments';
 import TournamentCard from './includes/TournamentCard.vue'
+import boardMembers from './../assets/images/board-members.jpg'
 
 // Mock fetch functions (replace with real API later)
 const liveMatches = ref([]);

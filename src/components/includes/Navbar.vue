@@ -63,43 +63,47 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import mainLogo from '../../assets/main-logo.png'
+    import {
+        ref,
+        onMounted,
+        onUnmounted
+    } from 'vue'
+    import mainLogo from '../../assets/main-logo.png'
 
-const isMenuOpen = ref(false)
-const isSticky = ref(false)
+    const isMenuOpen = ref(false)
+    const isSticky = ref(false)
 
-function toggleMenu() {
-    isMenuOpen.value = !isMenuOpen.value
-}
-function closeMenu() {
-    isMenuOpen.value = false
-}
+    function toggleMenu() {
+        isMenuOpen.value = !isMenuOpen.value
+    }
 
-// Sticky nav on scroll
-function handleScroll() {
-    isSticky.value = window.scrollY > 50
-}
+    function closeMenu() {
+        isMenuOpen.value = false
+    }
 
-onMounted(() => {
-    window.addEventListener('scroll', handleScroll)
-})
-onUnmounted(() => {
-    window.removeEventListener('scroll', handleScroll)
-})
+    // Sticky nav on scroll
+    function handleScroll() {
+        isSticky.value = window.scrollY > 50
+    }
+
+    onMounted(() => {
+        window.addEventListener('scroll', handleScroll)
+    })
+    onUnmounted(() => {
+        window.removeEventListener('scroll', handleScroll)
+    })
 </script>
 
 <style scoped>
-/* Slide fade transition for mobile menu */
-.slide-fade-enter-active,
-.slide-fade-leave-active {
-    transition: all 0.3s ease;
-}
+    /* Slide fade transition for mobile menu */
+    .slide-fade-enter-active,
+    .slide-fade-leave-active {
+        transition: all 0.3s ease;
+    }
 
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-    opacity: 0;
-    transform: translateY(-10px);
-}
-
+    .slide-fade-enter-from,
+    .slide-fade-leave-to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
 </style>
