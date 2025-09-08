@@ -125,7 +125,6 @@ import { fetchTournaments } from './api/tournaments';
 import TournamentCard from './includes/TournamentCard.vue'
 import boardMembers from './../assets/images/board-members.jpg'
 
-// Mock fetch functions (replace with real API later)
 const liveMatches = ref([]);
 const upcomingMatches = ref([]);
 const completedMatches = ref([]);
