@@ -22,8 +22,8 @@
             </ul>
 
             <div>
-                <router-link to="/registration" class="btn btn-sm btn-primary" type="button">Registration</router-link>
-                <a href="https://app.madcricketers.com/" class="btn btn-sm btn-info ml-3" target="_blank">Login</a>
+                <router-link to="/registration" class="btn btn-sm btn-theme" type="button">Registration</router-link>
+                <a href="https://app.madcricketers.com/" class="btn btn-sm btn-theme-outline ml-3" target="_blank">Login</a>
             </div>
 
             <!-- Mobile Hamburger Button -->
@@ -68,7 +68,7 @@
         onMounted,
         onUnmounted
     } from 'vue'
-    import mainLogo from '../../assets/main-logo.png'
+    import mainLogo from '../../assets/main-logo-dark.png'
 
     const isMenuOpen = ref(false)
     const isSticky = ref(false)
@@ -106,4 +106,33 @@
         opacity: 0;
         transform: translateY(-10px);
     }
+
+    /* Primary themed button */
+    .btn-theme {
+        background-color: #D84040; /* soft red */
+        color: #fff;
+        border: 1px solid #D84040;
+        transition: all 0.3s ease;
+    }
+
+    .btn-theme:hover {
+        background-color: #FF5A5A; /* slightly lighter red on hover */
+        border-color: #FF5A5A;
+        color: #fff;
+    }
+
+    /* Outline themed button (for login) */
+    .btn-theme-outline {
+        background-color: transparent;
+        color: #D84040;
+        border: 1px solid #D84040;
+        transition: all 0.3s ease;
+    }
+
+    .btn-theme-outline:hover {
+        background-color: #D84040;
+        color: #fff;
+        border-color: #D84040;
+    }
+
 </style>

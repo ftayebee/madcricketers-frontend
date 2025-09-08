@@ -19,7 +19,7 @@
         </div>
     </section>
 
-    <section class="bg-white">
+    <section class="bg-gray-200">
         <div class="flex items-center justify-center py-2" v-if="boardMembers.length > 0">
             <div class="container mx-auto px-4">
                 <div class="flex flex-wrap -mx-4">
@@ -31,7 +31,7 @@
         </div>
     </section>
 
-    <section id="home" class="bg-completed-matches bg-white-200">
+    <section id="home" class="bg-completed-matches bg-white">
         <div class="flex items-center justify-center py-24" v-if="completedMatches.length > 0">
             <div class="container mx-auto px-4">
                 <div class="flex flex-wrap -mx-4">
@@ -71,7 +71,7 @@
         </div>
     </section>
 
-    <section id="home" class="bg-tournaments bg-gray-200">
+    <section id="home" class="bg-tournaments bg-white">
         <div class="flex items-center justify-center py-24" v-if="tournaments.length > 0">
             <div class="container mx-auto px-4">
                 <div class="flex flex-wrap -mx-4">
