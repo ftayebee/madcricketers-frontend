@@ -1,6 +1,6 @@
 <template>
     <section id="home" class="bg-home py-24" :style="{ backgroundImage: `url(${bgHome})` }">
-        <div v-if="liveMatches.length > 0" class="flex items-center justify-center py-24" style="padding-top: 7rem;">
+        <div v-if="liveMatches.length > 0" class="flex items-center justify-center pt-4" style="padding-top: 7rem;">
             <div class="container mx-auto px-4">
                 <div class="flex flex-wrap -mx-4">
                     <div class="w-full lg:w-12/12 px-4">

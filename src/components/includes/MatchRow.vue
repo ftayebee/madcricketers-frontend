@@ -23,12 +23,11 @@
 
                     <!-- Result -->
                     <div class="result text-center" v-if="match?.status === 'completed'">
-                        <span class="winner block" :style="{ color: match.result.color }" style="padding-bottom: 6px;">
-                            {{ match.result.text }}
+                        <span v-if="match.result_summary" class="winner block" style="padding-bottom: 6px;color: #8FA31E;">
+                            {{ match.result_summary }}
                         </span>
-                        <span class="reason">
-                            <span>{{ match.result.matchType }}</span>
-                            {{ match?.team_a?.name }} vs {{ match?.team_b?.name }} {{ match.result.year }}
+                        <span v-else class="reason" style="color: rgb(0 121 44);">
+                            <span>{{ match.match_date }}</span>
                         </span>
                     </div>
 
@@ -40,7 +39,7 @@
                     </div>
 
                     <div class="result text-center" v-else>
-                        <span class="winner block text-gray-400">Starts at {{ match.status }}</span>
+                        <span class="winner block text-gray-400">Starts at </span>
                         <span class="reason text-gray-700">{{ match?.match_date }}</span>
                     </div>
 
@@ -74,6 +73,8 @@ const props = defineProps({
         required: true,
     }
 });
+
+console.log(props.match);
 
 const onImageError = (e) => {
     e.target.src = '/assets/img/unknown_team.png';

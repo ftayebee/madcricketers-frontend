@@ -62,22 +62,18 @@ const activeGroup = ref('');
 
 watch(() => props.tournament, (tournament) => {
     if (tournament && tournament.points_table) {
-        // Extract group names
         pointGroups.value = tournament.points_table.map(group => group.group_name);
-
-        // Set first group as active
         activeGroup.value = pointGroups.value[0] || '';
 
-        // Build pointsTable map
         const table = {};
         tournament.points_table.forEach(group => {
             table[group.group_name] = group.teams.map(team => ({
                 name: team.team_name || team.name,
-                p: team.p || 0,
-                w: team.w || 0,
-                l: team.l || 0,
+                p: team.matches_played || 0,
+                w: team.wins || 0,
+                l: team.losses || 0,
                 nrr: team.nrr || '0.00',
-                pts: team.pts || 0,
+                pts: team.points || 0,
             }));
         });
         pointsTable.value = table;
