@@ -14,8 +14,8 @@
 
                 <!-- Points Table -->
                 <div v-if="pointGroups.length">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-3">U19 WC 2024 Points Table</h3>
-                    <div class="flex space-x-2 mb-2">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Points Table</h3>
+                    <div class="flex space-x-2 mb-2" v-if="tournament.format == group">
                         <button v-for="(group, idx) in pointGroups" :key="idx" @click="activeGroup = group" :class="[
                             'px-3 py-1 text-sm rounded',
                             activeGroup === group
