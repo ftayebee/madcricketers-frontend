@@ -21,6 +21,7 @@ export default {
     },
     players: {
         all: "/players",
+        keyStats: "/players/key-stats",
         detail: (slug) => `/players/detail/${slug}`,
         stats: (slug) => `/players/detail/${slug}/stats`,
         registration: "/registration",

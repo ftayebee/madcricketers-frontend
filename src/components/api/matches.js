@@ -3,7 +3,7 @@ import endpoints from "./endpoints";
 
 export const fetchLiveMatches = async () => {
     try {
-        const res = await apiClient.get(endpoints.matches.upcoming);
+        const res = await apiClient.get(endpoints.matches.live);
         return res.data.data;
     } catch (error) {
         console.error("Failed to load live matches:", error);
@@ -22,22 +22,13 @@ export const fetchCompletedMatches = async () => {
 };
 
 export const fetchUpcomingMatches = async () => {
-    return Promise.resolve([
-        {
-            id: 3,
-            teamA: "Bangladesh",
-            teamB: "Sri Lanka",
-            startTime: "2025-07-20T14:00:00Z",
-            status: "Upcoming",
-        },
-        {
-            id: 4,
-            teamA: "South Africa",
-            teamB: "New Zealand",
-            startTime: "2025-07-21T10:00:00Z",
-            status: "Upcoming",
-        },
-    ]);
+    try {
+        const res = await apiClient.get(endpoints.matches.upcoming);
+        return res.data.data;
+    } catch (error) {
+        console.error("Failed to load completed matches:", error);
+        return [];
+    }
 };
 
 export const fetchMatchBySlug = async (slug) => {

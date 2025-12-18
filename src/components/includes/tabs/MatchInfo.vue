@@ -50,10 +50,10 @@
             </div>
 
             <!-- Sidebar -->
-            <div class="space-y-8">
-                <h4 class="text-lg font-semibold mb-3">Playing XI</h4>
+            <div class="space-y-8 border-l-2 pl-5">
+                <h4 class="text-lg font-semibold mb-3">Team Squad</h4>
 
-                <div>
+                <div class="mt-0">
                     <!-- Tabs -->
                     <div class="flex mb-4 space-x-4">
                         <button v-for="(team, index) in teamInfo" :key="index"
@@ -64,14 +64,14 @@
                         </button>
                     </div>
 
-                    <div v-if="teamInfo.length && teamInfo[activeTab]" class="grid grid-cols-2 gap-4">
+                    <div v-if="teamInfo.length && teamInfo[activeTab]" class="grid grid-cols-1 gap-2">
                         <div v-for="(player, idx) in teamInfo[activeTab].players" :key="idx"
-                            class="bg-gray-100 p-2 rounded flex items-center gap-3">
+                            class="bg-gray-100 p-2 rounded flex items-center gap-3 border border-gray-400">
                             <img :src="player.image || 'https://via.placeholder.com/40'" alt="Player Image"
                                 class="w-10 h-10 rounded-full object-cover" />
                             <div>
                                 <p class="text-sm font-medium text-gray-800 mb-1">{{ player.name }}</p>
-                                <p class="text-xs text-gray-600">{{ formatRole(player.role) }}</p>
+                                <p class="text-xs text-gray-600 m-0">{{ formatRole(player.role) }}</p>
                             </div>
                         </div>
                     </div>

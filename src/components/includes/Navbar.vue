@@ -13,11 +13,11 @@
                         active-class="text-blue-700">Tournaments</router-link></li>
                 <li><router-link to="/players" class="hover:text-blue-600 nav-link"
                         active-class="text-blue-700">Players</router-link></li>
-                <li><router-link to="/teams" class="hover:text-blue-600 nav-link"
-                        active-class="text-blue-700">Teams</router-link></li>
+                <li><router-link to="/fixtures" class="hover:text-blue-600 nav-link"
+                        active-class="text-blue-700">Fixtures</router-link></li>
                 <li>
-                    <router-link to="/team" class="hover:text-blue-600 nav-link"
-                        active-class="text-blue-700">Team</router-link>
+                    <router-link to="/contact" class="hover:text-blue-600 nav-link"
+                        active-class="text-blue-700">Contact</router-link>
                 </li>
             </ul>
 
