@@ -12,7 +12,6 @@
             <!-- Sidebar -->
             <div class="space-y-8">
                 <h4 class="text-lg font-semibold mb-3">Yet To Bat</h4>
-                
             </div>
         </div>
     </div>
@@ -22,7 +21,7 @@
 import { ref, watch, onMounted } from 'vue'
 
 const props = defineProps({
-    tournament: {
+    match: {
         type: Object,
         required: true
     }

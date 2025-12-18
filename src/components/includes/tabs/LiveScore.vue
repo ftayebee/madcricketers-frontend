@@ -1,11 +1,8 @@
 <template>
-    <div class="container bg-white min-h-screen">
+    <!-- <div class="container bg-white min-h-screen">
         <div class="max-w-7xl mx-auto py-10 px-4 grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-            <!-- Main Content -->
             <div class="lg:col-span-2 space-y-8">
                 <div class="flex align-middle justify-between">
-                    <!-- Currently Batting Player 1 -->
                     <div v-for="(player, idx) in teamInfo[activeTab].players" :key="idx"
                         class="bg-gray-100 p-2 rounded flex items-center gap-3">
                         <img :src="player.image || 'https://via.placeholder.com/40'" alt="Player Image"
@@ -15,7 +12,6 @@
                             <p class="text-xs text-gray-600">{{ runs (balls) }}</p>
                         </div>
                     </div>
-                    <!-- Currently Batting Player 2 -->
 
                     <div v-for="(player, idx) in teamInfo[activeTab].players" :key="idx"
                         class="bg-gray-100 p-2 rounded flex items-center gap-3">
@@ -38,14 +34,13 @@
                 </div>
             </div>
 
-            <!-- Sidebar -->
             <div class="space-y-8">
                 <h4 class="text-lg font-semibold mb-3">Probability</h4>
                 <h4 class="text-lg font-semibold mb-3">Projected Score <small class="text-sm text-gray-600">as per RR</small></h4>
                 
             </div>
         </div>
-    </div>
+    </div> -->
 </template>
 
 <script setup>

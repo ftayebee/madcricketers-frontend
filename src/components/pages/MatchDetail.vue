@@ -69,9 +69,23 @@
                                     </div>
                                 </div>
 
-                                <div v-else-if="match.status === 'live'">
+                                <div v-else-if="match.status === 'live' && !match.toss">
                                     <div class="text-lg font-bold text-yellow-300">
-                                        Innings Break
+                                        Toss Running
+                                    </div>
+                                </div>
+
+                                <div v-else-if="match.status === 'live' && tossInfo" class="mt-2">
+                                    <div class="text-sm text-yellow-300 font-medium toss-indicator">
+                                        {{ tossInfo }}
+                                    </div>
+                                    <div class="text-xs text-gray-300 mt-1">
+                                        <span v-if="battingFirstTeam === 'team_a'">
+                                            {{ match.team_a?.name }} batting first
+                                        </span>
+                                        <span v-else>
+                                            {{ match.team_b?.name }} batting first
+                                        </span>
                                     </div>
                                 </div>
 
@@ -88,7 +102,7 @@
                                 </div>
 
                                 <div class="text-xs text-gray-400 mt-2">
-                                    {{ match.venue || 'Venue TBD' }}
+                                    {{ match.venue || 'Rajshahi' }}
                                 </div>
                             </div>
                         </div>
@@ -164,7 +178,7 @@
 
 <script setup>
 import bgHome from './../../assets/bg/bg-home.png'
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { fetchMatchBySlug } from './../api/matches'
 import MatchInfo from '../includes/tabs/MatchInfo.vue'
@@ -175,11 +189,13 @@ import {
     formatMatchDateTime,
     getMatchResult
 } from './../../helpers/MatchHelper'
+import echo from '../../plugins/echo'
 
 const route = useRoute()
 const match = ref({})
 const tabs = ['Match Info', 'Live', 'Scorecard']
 const activeTab = ref('Match Info')
+const channel = ref(null)
 
 // Computed properties for dynamic data
 const currentInnings = computed(() => {
@@ -187,19 +203,37 @@ const currentInnings = computed(() => {
 
     // Find the innings that is currently in progress
     return match.value.innings.find(innings => innings.status === 'in_progress') ||
-        match.value.innings[match.value.innings.length - 1]; // Last innings if none in progress
+        match.value.innings[match.value.innings.length - 1];
 });
 
-const inningsByTeam = computed(() => {
-    const innings = {};
-    if (match.value.innings && Array.isArray(match.value.innings)) {
-        match.value.innings.forEach(inning => {
-            if (inning.batting_team_id) {
-                innings[inning.batting_team_id] = inning;
-            }
-        });
+const battingFirstTeam = computed(() => {
+    if (!match.value.toss || !match.value.team_a || !match.value.team_b) return null;
+
+    const tossDecision = match.value.toss.decision;
+    const tossWinnerId = match.value.toss.toss_winner_team_id;
+
+    if (tossDecision === 'bat') {
+        return match.value.team_a.id === tossWinnerId ? 'team_a' : 'team_b';
+    } else {
+        // If toss winner chose to bowl, the other team bats first
+        return match.value.team_a.id === tossWinnerId ? 'team_b' : 'team_a';
     }
-    return innings;
+});
+
+const bowlingFirstTeam = computed(() => {
+    return battingFirstTeam.value === 'team_a' ? 'team_b' : 'team_a';
+});
+
+const tossInfo = computed(() => {
+    if (!match.value.toss || !match.value.team_a || !match.value.team_b) return null;
+
+    const tossWinner = match.value.team_a.id === match.value.toss.toss_winner_team_id
+        ? match.value.team_a.name
+        : match.value.team_b.name;
+
+    const decision = match.value.toss.decision === 'bat' ? 'batting' : 'bowling';
+
+    return `${tossWinner} won the toss & chose to ${decision}`;
 });
 
 // Methods for dynamic data display
@@ -244,7 +278,6 @@ const getTotalScore = (teamType) => {
 
     if (teamInnings.length === 0) return '0';
 
-    // For completed matches, show the final score
     const lastInnings = teamInnings[teamInnings.length - 1];
     return `${lastInnings.runs || 0}/${lastInnings.wickets || 0}`;
 };
@@ -252,7 +285,6 @@ const getTotalScore = (teamType) => {
 const getRequiredRunRate = () => {
     if (!currentInnings.value || !match.value.innings || match.value.innings.length < 2) return '0.0';
 
-    // RRR calculation for chasing team
     const firstInnings = match.value.innings[0];
     const target = (firstInnings.runs || 0) + 1;
     const currentRuns = currentInnings.value.runs || 0;
@@ -272,9 +304,163 @@ const getTarget = () => {
 };
 
 const onImageError = (event, teamType) => {
-    // Set a default image or show placeholder
     event.target.style.display = 'none';
-    // The fallback div will show because of v-else
+};
+
+const updateMatchWithTossData = (tossData) => {
+    console.log('Updating match with toss data:', tossData);
+
+    // Update match data with new toss information
+    if (tossData.match) {
+        match.value = {
+            ...match.value,
+            status: tossData.match.status,
+            toss: tossData.match.toss,
+        };
+    }
+
+    // If there are scoreboard updates, update innings
+    if (tossData.batting_first_team_id) {
+        // Update innings based on toss
+        const battingTeamId = tossData.batting_first_team_id;
+        const bowlingTeamId = tossData.bowling_first_team_id;
+
+        // Create or update innings data
+        if (!match.value.innings) {
+            match.value.innings = [];
+        }
+
+        // Add first innings if not exists
+        const firstInningsExists = match.value.innings.some(i => i.innings === 1);
+        if (!firstInningsExists) {
+            match.value.innings.push({
+                innings: 1,
+                batting_team_id: battingTeamId,
+                runs: 0,
+                wickets: 0,
+                overs: 0,
+                status: 'running'
+            });
+        }
+
+        // Add second innings if not exists
+        const secondInningsExists = match.value.innings.some(i => i.innings === 2);
+        if (!secondInningsExists) {
+            match.value.innings.push({
+                innings: 2,
+                batting_team_id: bowlingTeamId,
+                runs: 0,
+                wickets: 0,
+                overs: 0,
+                status: 'waiting'
+            });
+        }
+    }
+
+    // Show notification or update UI
+    showTossNotification(tossData);
+};
+
+const showTossNotification = (tossData) => {
+    const tossWinnerId = tossData.toss_winner_team_id;
+    const tossDecision = tossData.toss_decision;
+    const battingTeamId = tossData.batting_first_team_id;
+
+    let message = '';
+
+    if (tossWinnerId === battingTeamId) {
+        // Toss winner chose to bat
+        message = `Toss completed! ${match.value.team_a?.id === tossWinnerId ? match.value.team_a?.name : match.value.team_b?.name} won the toss and chose to bat first.`;
+    } else {
+        // Toss winner chose to bowl
+        message = `Toss completed! ${match.value.team_a?.id === tossWinnerId ? match.value.team_a?.name : match.value.team_b?.name} won the toss and chose to bowl first.`;
+    }
+
+    // You can use a toast notification library or show alert
+    alert(message);
+    // Or using a toast library:
+    // toast.success(message);
+};
+
+const setupRealTimeListeners = () => {
+    if (!match.value.id) {
+        console.error('Cannot setup listeners: match.id is missing');
+        return;
+    }
+
+    // Clean up previous channel if exists
+    if (channel.value) {
+        console.log('Cleaning up previous channel');
+        channel.value.unsubscribe();
+    }
+
+    const channelName = `cricket-match.${match.value.id}`;
+    console.log(`Setting up real-time listeners for channel: ${channelName}`);
+
+    try {
+        // Join the match-specific channel
+        channel.value = echo.channel(channelName);
+        
+        // Debug connection
+        channel.value.connected(() => {
+            console.log(`✅ Successfully connected to channel: ${channelName}`);
+        });
+        
+        channel.value.error((error) => {
+            console.error('❌ Channel connection error:', error);
+        });
+        
+        channel.value.subscribed(() => {
+            console.log(`✅ Successfully subscribed to channel: ${channelName}`);
+        });
+
+        // Listen for toss updates - TRY BOTH FORMATS
+        console.log('Setting up listener for toss.updated');
+        
+        // Method 1: With dot prefix (works for private/presence channels)
+        channel.value.listen('.toss.updated', (data) => {
+            console.log('📢 Toss update received (with dot):', data);
+            updateMatchWithTossData(data);
+        });
+        
+        // Method 2: Without dot prefix (try both)
+        channel.value.listen('toss.updated', (data) => {
+            console.log('📢 Toss update received (without dot):', data);
+            updateMatchWithTossData(data);
+        });
+        
+        // Method 3: Use Echo's notification helper
+        echo.listen(`cricket-match.${match.value.id}`, '.toss.updated', (data) => {
+            console.log('📢 Toss update received (Echo helper):', data);
+            updateMatchWithTossData(data);
+        });
+
+        // Listen for all events on this channel (for debugging)
+        channel.value.notification((event) => {
+            console.log('📢 Generic event received:', event);
+        });
+
+        // Listen for connection status
+        echo.connector.pusher.connection.bind('connected', () => {
+            console.log('✅ Pusher connected successfully');
+        });
+        
+        echo.connector.pusher.connection.bind('error', (error) => {
+            console.error('❌ Pusher connection error:', error);
+        });
+
+        console.log(`✅ Listening for real-time updates on match ${match.value.id}`);
+
+    } catch (error) {
+        console.error('❌ Error setting up real-time listeners:', error);
+    }
+};
+
+const cleanupRealTimeListeners = () => {
+    if (channel.value) {
+        channel.value.unsubscribe();
+        channel.value = null;
+    }
 };
 
 onMounted(async () => {
@@ -297,9 +483,25 @@ onMounted(async () => {
         if (match.value.status === 'live') {
             activeTab.value = 'Live';
         }
+
+        // Setup real-time listeners after match data is loaded
+        setupRealTimeListeners();
+
     } catch (error) {
         console.error('Error fetching match:', error);
     }
+});
+
+// Watch for match ID changes
+watch(() => match.value.id, (newId) => {
+    if (newId) {
+        setupRealTimeListeners();
+    }
+});
+
+// Clean up on unmount
+onUnmounted(() => {
+    cleanupRealTimeListeners();
 });
 
 // Watch for match status changes
@@ -317,11 +519,25 @@ watch(() => match.value.status, (newStatus) => {
     background-position: center;
     background-repeat: no-repeat;
     background-color: #1a202c;
-    /* Fallback color */
 }
 
-/* Smooth transitions */
 button {
     transition: all 0.2s ease;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.toss-indicator {
+    animation: pulse 2s infinite;
 }
 </style>
