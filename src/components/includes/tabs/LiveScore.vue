@@ -49,8 +49,8 @@ import { ref, watch, onMounted } from 'vue'
 const props = defineProps({
     tournament: {
         type: Object,
-        required: true
-    }
+        required: false
+    },
 });
 
 const pointGroups = ref([]);

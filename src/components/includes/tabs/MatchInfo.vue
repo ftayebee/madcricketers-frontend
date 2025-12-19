@@ -90,7 +90,7 @@ import { fetchTeamInfo } from './../../api/matches'
 const props = defineProps({
     tournament: {
         type: Object,
-        required: true
+        required: false
     },
     match: {
         type: Object,

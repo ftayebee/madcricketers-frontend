@@ -6,7 +6,7 @@
                     <!-- Match Header -->
                     <div class="flex flex-wrap -mx-4 justify-between items-center pb-12">
                         <!-- Team A -->
-                        <div class="w-full lg:w-5/12 px-4 mb-6 lg:mb-0">
+                        <div class="w-full lg:w-4/12 px-4 mb-6 lg:mb-0">
                             <div class="flex items-center">
                                 <div class="flex-shrink-0">
                                     <img v-if="match?.team_a?.logo && !match?.team_a?.logo.includes('team-dummy')"
@@ -17,7 +17,7 @@
                                         class="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center border-2 border-blue-100">
                                         <span class="font-bold text-blue-700 text-xl">{{
                                             getTeamAbbreviation(match?.team_a?.name)
-                                        }}</span>
+                                            }}</span>
                                     </div>
                                 </div>
                                 <div class="ml-4">
@@ -36,7 +36,7 @@
                                     <div v-else-if="match?.status === 'completed'">
                                         <div class="flex items-center">
                                             <span class="text-2xl font-bold text-white">{{ getTotalScore('team_a')
-                                                }}</span>
+                                            }}</span>
                                         </div>
                                     </div>
                                     <div v-else>
@@ -47,7 +47,7 @@
                         </div>
 
                         <!-- Match Status & Info -->
-                        <div class="w-full lg:w-2/12 px-4 mb-6 lg:mb-0">
+                        <div class="w-full lg:w-4/12 px-4 mb-6 lg:mb-0">
                             <div class="text-center">
                                 <div class="mb-3">
                                     <span :class="[
@@ -60,7 +60,8 @@
                                     </span>
                                 </div>
 
-                                <div v-if="match.status === 'live' && currentInnings">
+                                <!-- Innings started -->
+                                <div v-if="match.status === 'live' && isInningsStarted">
                                     <div class="text-lg font-bold text-yellow-300 mb-1">
                                         {{ getRequiredRunRate() }} RRR
                                     </div>
@@ -69,23 +70,23 @@
                                     </div>
                                 </div>
 
-                                <div v-else-if="match.status === 'live' && !match.toss">
-                                    <div class="text-lg font-bold text-yellow-300">
-                                        Toss Running
-                                    </div>
-                                </div>
-
-                                <div v-else-if="match.status === 'live' && tossInfo" class="mt-2">
+                                <!-- Toss completed but innings not started -->
+                                <div v-else-if="match.status === 'live' && match.toss">
                                     <div class="text-sm text-yellow-300 font-medium toss-indicator">
                                         {{ tossInfo }}
                                     </div>
                                     <div class="text-xs text-gray-300 mt-1">
-                                        <span v-if="battingFirstTeam === 'team_a'">
-                                            {{ match.team_a?.name }} batting first
-                                        </span>
-                                        <span v-else>
-                                            {{ match.team_b?.name }} batting first
-                                        </span>
+                                        {{ battingFirstTeam === 'team_a'
+                                            ? match.team_a?.name
+                                        : match.team_b?.name
+                                        }} batting first
+                                    </div>
+                                </div>
+
+                                <!-- Toss running -->
+                                <div v-else-if="match.status === 'live'">
+                                    <div class="text-lg font-bold text-yellow-300">
+                                        Toss Running
                                     </div>
                                 </div>
 
@@ -108,7 +109,7 @@
                         </div>
 
                         <!-- Team B -->
-                        <div class="w-full lg:w-5/12 px-4">
+                        <div class="w-full lg:w-4/12 px-4">
                             <div class="flex items-center justify-end">
                                 <div class="text-right mr-4">
                                     <h4 class="text-lg font-semibold text-gray-100 mb-1">{{ match?.team_b?.name }}</h4>
@@ -126,7 +127,7 @@
                                     <div v-else-if="match?.status === 'completed'">
                                         <div class="flex items-center justify-end">
                                             <span class="text-2xl font-bold text-white">{{ getTotalScore('team_b')
-                                                }}</span>
+                                            }}</span>
                                         </div>
                                     </div>
                                     <div v-else>
@@ -142,7 +143,7 @@
                                         class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center border-2 border-red-100">
                                         <span class="font-bold text-red-700 text-xl">{{
                                             getTeamAbbreviation(match?.team_b?.name)
-                                        }}</span>
+                                            }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -169,7 +170,7 @@
     <div class="min-h-screen">
         <!-- Tab Content -->
         <div>
-            <MatchInfo v-if="activeTab === 'Match Info'" :tournament="match.tournament" :match="match" />
+            <MatchInfo v-if="activeTab === 'Match Info'" :tournament="match.tournament ?? null" :match="match" />
             <LiveScore v-if="activeTab === 'Live'" :match="match" :currentInnings="currentInnings" />
             <ScoreCard v-if="activeTab === 'Scorecard'" :match="match" />
         </div>
@@ -190,20 +191,30 @@ import {
     getMatchResult
 } from './../../helpers/MatchHelper'
 import echo from '../../plugins/echo'
+import { useToast } from "vue-toastification";
 
+const toast = useToast();
 const route = useRoute()
 const match = ref({})
 const tabs = ['Match Info', 'Live', 'Scorecard']
 const activeTab = ref('Match Info')
 const channel = ref(null)
+const match_id = route.params.id;
+const tossNotified = ref(false);
 
-// Computed properties for dynamic data
+const isInningsStarted = computed(() => {
+    if (!currentInnings.value) return false;
+    return currentInnings.value.overs > 0;
+});
+
 const currentInnings = computed(() => {
     if (!match.value.innings || !Array.isArray(match.value.innings)) return null;
 
-    // Find the innings that is currently in progress
-    return match.value.innings.find(innings => innings.status === 'in_progress') ||
-        match.value.innings[match.value.innings.length - 1];
+    const running = match.value.innings.find(i =>
+        ['running', 'in_progress'].includes(i.status)
+    );
+
+    return running || null;
 });
 
 const battingFirstTeam = computed(() => {
@@ -308,9 +319,6 @@ const onImageError = (event, teamType) => {
 };
 
 const updateMatchWithTossData = (tossData) => {
-    console.log('Updating match with toss data:', tossData);
-
-    // Update match data with new toss information
     if (tossData.match) {
         match.value = {
             ...match.value,
@@ -319,18 +327,14 @@ const updateMatchWithTossData = (tossData) => {
         };
     }
 
-    // If there are scoreboard updates, update innings
     if (tossData.batting_first_team_id) {
-        // Update innings based on toss
         const battingTeamId = tossData.batting_first_team_id;
         const bowlingTeamId = tossData.bowling_first_team_id;
 
-        // Create or update innings data
         if (!match.value.innings) {
             match.value.innings = [];
         }
 
-        // Add first innings if not exists
         const firstInningsExists = match.value.innings.some(i => i.innings === 1);
         if (!firstInningsExists) {
             match.value.innings.push({
@@ -343,7 +347,6 @@ const updateMatchWithTossData = (tossData) => {
             });
         }
 
-        // Add second innings if not exists
         const secondInningsExists = match.value.innings.some(i => i.innings === 2);
         if (!secondInningsExists) {
             match.value.innings.push({
@@ -356,104 +359,60 @@ const updateMatchWithTossData = (tossData) => {
             });
         }
     }
-
-    // Show notification or update UI
-    showTossNotification(tossData);
 };
 
 const showTossNotification = (tossData) => {
-    const tossWinnerId = tossData.toss_winner_team_id;
-    const tossDecision = tossData.toss_decision;
-    const battingTeamId = tossData.batting_first_team_id;
+    if (tossNotified.value) return;
 
-    let message = '';
+    tossNotified.value = true;
 
-    if (tossWinnerId === battingTeamId) {
-        // Toss winner chose to bat
-        message = `Toss completed! ${match.value.team_a?.id === tossWinnerId ? match.value.team_a?.name : match.value.team_b?.name} won the toss and chose to bat first.`;
-    } else {
-        // Toss winner chose to bowl
-        message = `Toss completed! ${match.value.team_a?.id === tossWinnerId ? match.value.team_a?.name : match.value.team_b?.name} won the toss and chose to bowl first.`;
-    }
+    const tossWinnerName =
+        tossData.toss_winner_team_id === match.value.team_a?.id
+            ? match.value.team_a?.name
+            : match.value.team_b?.name;
 
-    // You can use a toast notification library or show alert
-    alert(message);
-    // Or using a toast library:
-    // toast.success(message);
+    const decision =
+        tossData.toss_decision === 'bat' ? 'batting' : 'bowling';
+
+    toast.success(
+        `${tossWinnerName} won the toss and chose ${decision} first!`,
+        {
+            position: "top-right",
+            timeout: 5000,
+        }
+    );
 };
-
 const setupRealTimeListeners = () => {
-    if (!match.value.id) {
-        console.error('Cannot setup listeners: match.id is missing');
+    if (!window.Echo || !match.value.id) {
+        console.error('❌ Echo or match ID not available');
         return;
     }
 
-    // Clean up previous channel if exists
-    if (channel.value) {
-        console.log('Cleaning up previous channel');
-        channel.value.unsubscribe();
-    }
-
     const channelName = `cricket-match.${match.value.id}`;
-    console.log(`Setting up real-time listeners for channel: ${channelName}`);
 
-    try {
-        // Join the match-specific channel
-        channel.value = echo.channel(channelName);
-        
-        // Debug connection
-        channel.value.connected(() => {
-            console.log(`✅ Successfully connected to channel: ${channelName}`);
-        });
-        
-        channel.value.error((error) => {
-            console.error('❌ Channel connection error:', error);
-        });
-        
-        channel.value.subscribed(() => {
-            console.log(`✅ Successfully subscribed to channel: ${channelName}`);
-        });
-
-        // Listen for toss updates - TRY BOTH FORMATS
-        console.log('Setting up listener for toss.updated');
-        
-        // Method 1: With dot prefix (works for private/presence channels)
-        channel.value.listen('.toss.updated', (data) => {
-            console.log('📢 Toss update received (with dot):', data);
-            updateMatchWithTossData(data);
-        });
-        
-        // Method 2: Without dot prefix (try both)
-        channel.value.listen('toss.updated', (data) => {
-            console.log('📢 Toss update received (without dot):', data);
-            updateMatchWithTossData(data);
-        });
-        
-        // Method 3: Use Echo's notification helper
-        echo.listen(`cricket-match.${match.value.id}`, '.toss.updated', (data) => {
-            console.log('📢 Toss update received (Echo helper):', data);
-            updateMatchWithTossData(data);
-        });
-
-        // Listen for all events on this channel (for debugging)
-        channel.value.notification((event) => {
-            console.log('📢 Generic event received:', event);
-        });
-
-        // Listen for connection status
-        echo.connector.pusher.connection.bind('connected', () => {
-            console.log('✅ Pusher connected successfully');
-        });
-        
-        echo.connector.pusher.connection.bind('error', (error) => {
-            console.error('❌ Pusher connection error:', error);
-        });
-
-        console.log(`✅ Listening for real-time updates on match ${match.value.id}`);
-
-    } catch (error) {
-        console.error('❌ Error setting up real-time listeners:', error);
+    if (channel.value) {
+        window.Echo.leave(channelName);
+        channel.value = null;
     }
+
+    channel.value = window.Echo
+        .channel(channelName)
+        .listen('.toss-updated', (data) => {
+            handleTossEvent(data);
+            showTossNotification(data);
+        });
+};
+
+const handleTossEvent = (data) => {
+    if (data.match) {
+        match.value.status = data.match.status || match.value.status;
+        match.value.toss = data.match.toss || data;
+    }
+
+    match.value.toss_winner_team_id = data.toss_winner_team_id;
+    match.value.toss_decision = data.toss_decision;
+    match.value.batting_first_team_id = data.batting_first_team_id;
+    match.value.bowling_first_team_id = data.bowling_first_team_id;
 };
 
 const cleanupRealTimeListeners = () => {
@@ -464,27 +423,23 @@ const cleanupRealTimeListeners = () => {
 };
 
 onMounted(async () => {
-    const id = route.params.id
-
-    if (!id) {
+    if (!match_id) {
         console.error('ID not found in route params')
         return
     }
 
     try {
-        match.value = await fetchMatchBySlug(id);
+        match.value = await fetchMatchBySlug(match_id);
 
         if (!match.value) {
-            console.error('Match not found for id:', route.params.id)
+            console.error('Match not found for id:', match_id)
             return;
         }
 
-        // Auto-select Live tab if match is live
         if (match.value.status === 'live') {
             activeTab.value = 'Live';
         }
 
-        // Setup real-time listeners after match data is loaded
         setupRealTimeListeners();
 
     } catch (error) {
@@ -492,7 +447,6 @@ onMounted(async () => {
     }
 });
 
-// Watch for match ID changes
 watch(() => match.value.id, (newId) => {
     if (newId) {
         setupRealTimeListeners();
@@ -509,6 +463,13 @@ watch(() => match.value.status, (newStatus) => {
     if (newStatus === 'live') {
         activeTab.value = 'Live';
     }
+
+    console.log('HEADER STATE', {
+        toss: match.value.toss,
+        innings: match.value.innings,
+        currentInnings: currentInnings.value,
+        started: isInningsStarted.value
+    });
 });
 
 </script>
