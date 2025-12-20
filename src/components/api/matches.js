@@ -50,3 +50,21 @@ export const fetchTeamInfo = async (id) => {
         return null;
     }
 }
+
+
+export const fetchCricketMatchTeamData = async (payload) => {
+    try {
+        console.log("Payload: ", payload);
+        const res = await apiClient.get(
+            endpoints.matches.liveData,
+            {
+                params: payload
+            }
+        );
+
+        return res.data;
+    } catch (error) {
+        console.error('Failed to load team data:', error);
+        return null;
+    }
+};

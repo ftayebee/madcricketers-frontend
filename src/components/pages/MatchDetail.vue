@@ -17,7 +17,7 @@
                                         class="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center border-2 border-blue-100">
                                         <span class="font-bold text-blue-700 text-xl">{{
                                             getTeamAbbreviation(match?.team_a?.name)
-                                            }}</span>
+                                        }}</span>
                                     </div>
                                 </div>
                                 <div class="ml-4">
@@ -36,7 +36,7 @@
                                     <div v-else-if="match?.status === 'completed'">
                                         <div class="flex items-center">
                                             <span class="text-2xl font-bold text-white">{{ getTotalScore('team_a')
-                                            }}</span>
+                                                }}</span>
                                         </div>
                                     </div>
                                     <div v-else>
@@ -78,7 +78,7 @@
                                     <div class="text-xs text-gray-300 mt-1">
                                         {{ battingFirstTeam === 'team_a'
                                             ? match.team_a?.name
-                                        : match.team_b?.name
+                                            : match.team_b?.name
                                         }} batting first
                                     </div>
                                 </div>
@@ -127,7 +127,7 @@
                                     <div v-else-if="match?.status === 'completed'">
                                         <div class="flex items-center justify-end">
                                             <span class="text-2xl font-bold text-white">{{ getTotalScore('team_b')
-                                            }}</span>
+                                                }}</span>
                                         </div>
                                     </div>
                                     <div v-else>
@@ -143,7 +143,7 @@
                                         class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center border-2 border-red-100">
                                         <span class="font-bold text-red-700 text-xl">{{
                                             getTeamAbbreviation(match?.team_b?.name)
-                                            }}</span>
+                                        }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -168,10 +168,9 @@
     </section>
 
     <div class="min-h-screen">
-        <!-- Tab Content -->
         <div>
             <MatchInfo v-if="activeTab === 'Match Info'" :tournament="match.tournament ?? null" :match="match" />
-            <LiveScore v-if="activeTab === 'Live'" :match="match" :currentInnings="currentInnings" />
+            <LiveScore v-if="activeTab === 'Live'" :battingTeam="battingTeam" :currentInnings="currentInnings" />
             <ScoreCard v-if="activeTab === 'Scorecard'" :match="match" />
         </div>
     </div>
@@ -181,7 +180,7 @@
 import bgHome from './../../assets/bg/bg-home.png'
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { fetchMatchBySlug } from './../api/matches'
+import { fetchMatchBySlug, fetchCricketMatchTeamData } from './../api/matches'
 import MatchInfo from '../includes/tabs/MatchInfo.vue'
 import LiveScore from '../includes/tabs/LiveScore.vue'
 import ScoreCard from '../includes/tabs/ScoreCard.vue'
@@ -193,14 +192,17 @@ import {
 import echo from '../../plugins/echo'
 import { useToast } from "vue-toastification";
 
-const toast = useToast();
-const route = useRoute()
-const match = ref({})
-const tabs = ['Match Info', 'Live', 'Scorecard']
-const activeTab = ref('Match Info')
-const channel = ref(null)
-const match_id = route.params.id;
-const tossNotified = ref(false);
+const toast         = useToast();
+const route         = useRoute();
+const match         = ref({});
+const battingTeam   = ref({});
+const bowlingTeam   = ref({});
+const scoreboard    = ref({});
+const tabs          = ['Match Info', 'Live', 'Scorecard'];
+const activeTab     = ref('Match Info');
+const channel       = ref(null);
+const match_id      = route.params.id;
+const tossNotified  = ref(false);
 
 const isInningsStarted = computed(() => {
     if (!currentInnings.value) return false;
@@ -318,49 +320,6 @@ const onImageError = (event, teamType) => {
     event.target.style.display = 'none';
 };
 
-const updateMatchWithTossData = (tossData) => {
-    if (tossData.match) {
-        match.value = {
-            ...match.value,
-            status: tossData.match.status,
-            toss: tossData.match.toss,
-        };
-    }
-
-    if (tossData.batting_first_team_id) {
-        const battingTeamId = tossData.batting_first_team_id;
-        const bowlingTeamId = tossData.bowling_first_team_id;
-
-        if (!match.value.innings) {
-            match.value.innings = [];
-        }
-
-        const firstInningsExists = match.value.innings.some(i => i.innings === 1);
-        if (!firstInningsExists) {
-            match.value.innings.push({
-                innings: 1,
-                batting_team_id: battingTeamId,
-                runs: 0,
-                wickets: 0,
-                overs: 0,
-                status: 'running'
-            });
-        }
-
-        const secondInningsExists = match.value.innings.some(i => i.innings === 2);
-        if (!secondInningsExists) {
-            match.value.innings.push({
-                innings: 2,
-                batting_team_id: bowlingTeamId,
-                runs: 0,
-                wickets: 0,
-                overs: 0,
-                status: 'waiting'
-            });
-        }
-    }
-};
-
 const showTossNotification = (tossData) => {
     if (tossNotified.value) return;
 
@@ -382,6 +341,7 @@ const showTossNotification = (tossData) => {
         }
     );
 };
+
 const setupRealTimeListeners = () => {
     if (!window.Echo || !match.value.id) {
         console.error('❌ Echo or match ID not available');
@@ -403,6 +363,26 @@ const setupRealTimeListeners = () => {
         });
 };
 
+const getTeamData = async (
+    batting_team,
+    bowling_team,
+    match_id,
+    is_tournament,
+    tournament_id = null
+) => {
+    const payload = {
+        batting_team,
+        bowling_team,
+        match_id,
+        is_tournament,
+        tournament_id,
+    };
+
+    const response = await fetchCricketMatchTeamData(payload);
+
+    console.log(response);
+};
+
 const handleTossEvent = (data) => {
     if (data.match) {
         match.value.status = data.match.status || match.value.status;
@@ -413,6 +393,8 @@ const handleTossEvent = (data) => {
     match.value.toss_decision = data.toss_decision;
     match.value.batting_first_team_id = data.batting_first_team_id;
     match.value.bowling_first_team_id = data.bowling_first_team_id;
+
+    getTeamData(data.batting_first_team_id, data.bowling_first_team_id, match.value.id, data.is_tournament, data.bowling_first_team_id)
 };
 
 const cleanupRealTimeListeners = () => {

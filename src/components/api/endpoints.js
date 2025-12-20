@@ -4,6 +4,7 @@ export default {
         completed: "/matches/completed",
         upcoming: "/matches/upcoming",
         live: "/matches/live",
+        liveData: "/matches/get-team-data",
         detail: (slug) => `/matches/detail/${slug}`,
         teamInfo: (id) => `/matches/detail/team-info/${id}`,
     },

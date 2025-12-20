@@ -47,7 +47,7 @@
 import { ref, watch, onMounted } from 'vue'
 
 const props = defineProps({
-    tournament: {
+    battingTeam: {
         type: Object,
         required: false
     },
