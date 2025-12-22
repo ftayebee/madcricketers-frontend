@@ -170,8 +170,8 @@
     <div class="min-h-screen">
         <div>
             <MatchInfo v-if="activeTab === 'Match Info'" :tournament="match.tournament ?? null" :match="match" />
-            <LiveScore v-if="activeTab === 'Live'" :battingTeam="battingTeam" :currentInnings="currentInnings" />
-            <ScoreCard v-if="activeTab === 'Scorecard'" :match="match" />
+            <LiveScore v-if="activeTab === 'Live'" :striker="striker" :nonStriker="nonStriker" :bowler="bowler" :currentOver="currentOver" :scoreboard="scoreboard" :probability="probability"/>
+            <ScoreCard v-if="activeTab === 'Scorecard'" :match="match" :yetToBatList="yetToBatList" />
         </div>
     </div>
 </template>
@@ -180,7 +180,7 @@
 import bgHome from './../../assets/bg/bg-home.png'
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { fetchMatchBySlug, fetchCricketMatchTeamData } from './../api/matches'
+import { fetchMatchBySlug, fetchCricketMatchData } from './../api/matches'
 import MatchInfo from '../includes/tabs/MatchInfo.vue'
 import LiveScore from '../includes/tabs/LiveScore.vue'
 import ScoreCard from '../includes/tabs/ScoreCard.vue'
@@ -198,6 +198,12 @@ const match         = ref({});
 const battingTeam   = ref({});
 const bowlingTeam   = ref({});
 const scoreboard    = ref({});
+const striker       = ref({});
+const nonStriker    = ref({});
+const bowler        = ref({});
+const currentOver   = ref({});
+const probability   = ref({});
+const yetToBatList  = ref({});
 const tabs          = ['Match Info', 'Live', 'Scorecard'];
 const activeTab     = ref('Match Info');
 const channel       = ref(null);
@@ -320,10 +326,27 @@ const onImageError = (event, teamType) => {
     event.target.style.display = 'none';
 };
 
+const updateMatchData = async () => {
+    const response = await fetchCricketMatchData({match_id: match.value.id});
+
+    if(response.success){
+        battingTeam.value = response.data.battingTeam;
+        bowlingTeam.value = response.data.bowlingTeam;
+        scoreboard.value  = response.data.scoreboard;
+        striker.value     = response.data.striker;
+        nonStriker.value  = response.data.nonStriker;
+        bowler.value      = response.data.bowler;
+        currentOver.value = response.data.currentOver;
+        probability.value = response.data.probability;
+    }
+}
+
 const showTossNotification = (tossData) => {
     if (tossNotified.value) return;
 
     tossNotified.value = true;
+
+    updateMatchData();
 
     const tossWinnerName =
         tossData.toss_winner_team_id === match.value.team_a?.id
@@ -363,26 +386,6 @@ const setupRealTimeListeners = () => {
         });
 };
 
-const getTeamData = async (
-    batting_team,
-    bowling_team,
-    match_id,
-    is_tournament,
-    tournament_id = null
-) => {
-    const payload = {
-        batting_team,
-        bowling_team,
-        match_id,
-        is_tournament,
-        tournament_id,
-    };
-
-    const response = await fetchCricketMatchTeamData(payload);
-
-    console.log(response);
-};
-
 const handleTossEvent = (data) => {
     if (data.match) {
         match.value.status = data.match.status || match.value.status;
@@ -393,8 +396,6 @@ const handleTossEvent = (data) => {
     match.value.toss_decision = data.toss_decision;
     match.value.batting_first_team_id = data.batting_first_team_id;
     match.value.bowling_first_team_id = data.bowling_first_team_id;
-
-    getTeamData(data.batting_first_team_id, data.bowling_first_team_id, match.value.id, data.is_tournament, data.bowling_first_team_id)
 };
 
 const cleanupRealTimeListeners = () => {

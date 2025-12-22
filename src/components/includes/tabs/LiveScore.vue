@@ -1,79 +1,162 @@
 <template>
-    <!-- <div class="container bg-white min-h-screen">
-        <div class="max-w-7xl mx-auto py-10 px-4 grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 space-y-8">
-                <div class="flex align-middle justify-between">
-                    <div v-for="(player, idx) in teamInfo[activeTab].players" :key="idx"
-                        class="bg-gray-100 p-2 rounded flex items-center gap-3">
-                        <img :src="player.image || 'https://via.placeholder.com/40'" alt="Player Image"
-                            class="w-10 h-10 rounded-full object-cover" />
-                        <div>
-                            <p class="text-sm font-medium text-gray-800 mb-1">{{ player.name }}</p>
-                            <p class="text-xs text-gray-600">{{ runs (balls) }}</p>
-                        </div>
-                    </div>
-
-                    <div v-for="(player, idx) in teamInfo[activeTab].players" :key="idx"
-                        class="bg-gray-100 p-2 rounded flex items-center gap-3">
-                        <img :src="player.image || 'https://via.placeholder.com/40'" alt="Player Image"
-                            class="w-10 h-10 rounded-full object-cover" />
-                        <div>
-                            <p class="text-sm font-medium text-gray-800 mb-1">{{ player.name }}</p>
-                            <p class="text-xs text-gray-600">{{ runs (balls) }}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <p>Partnerships: <span>runs (balls)</span></p>
-                    <p>Last Wicket: Player Name Runs (Balls)</p>
-                </div>
-
-                <div>
-                    
-                </div>
-            </div>
-
-            <div class="space-y-8">
-                <h4 class="text-lg font-semibold mb-3">Probability</h4>
-                <h4 class="text-lg font-semibold mb-3">Projected Score <small class="text-sm text-gray-600">as per RR</small></h4>
-                
+    <div class="container mx-auto bg-white min-h-screen py-6 px-4">
+        <div v-if="isMatchNotStarted" class="flex items-center justify-center min-h-[60vh]">
+            <div class="text-center bg-yellow-50 border border-yellow-300 px-6 py-4 rounded">
+                <p class="text-lg font-semibold text-yellow-800">
+                    Match will start soon 🏏
+                </p>
+                <p class="text-sm text-yellow-700 mt-1">
+                    Stay tuned for live updates
+                </p>
             </div>
         </div>
-    </div> -->
+
+        <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- LEFT: Batting & Over Info -->
+            <div class="lg:col-span-2 space-y-6">
+
+                <!-- Batters -->
+                <div class="flex justify-between gap-4">
+                    <!-- Striker -->
+                    <div class="flex-1 bg-gray-100 p-3 rounded flex items-center gap-3">
+                        <img :src="striker?.image || placeholder" class="w-12 h-12 rounded-full object-cover" />
+                        <div>
+                            <p class="text-sm font-semibold">
+                                {{ striker?.name }} *
+                            </p>
+                            <p class="text-xs text-gray-600">
+                                {{ striker?.runs }} ({{ striker?.balls }})
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Non-Striker -->
+                    <div class="flex-1 bg-gray-100 p-3 rounded flex items-center gap-3">
+                        <img :src="nonStriker?.image || placeholder" class="w-12 h-12 rounded-full object-cover" />
+                        <div>
+                            <p class="text-sm font-semibold">
+                                {{ nonStriker?.name }}
+                            </p>
+                            <p class="text-xs text-gray-600">
+                                {{ nonStriker?.runs }} ({{ nonStriker?.balls }})
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Over -->
+                <div class="bg-gray-50 p-4 rounded">
+                    <p class="text-sm font-medium mb-2">
+                        Current Over ({{ currentOver?.over_number }})
+                    </p>
+
+                    <div class="flex gap-2">
+                        <span v-for="(ball, i) in currentOver?.balls" :key="i"
+                            class="w-8 h-8 flex items-center justify-center rounded-full text-sm font-semibold"
+                            :class="ballClass(ball)">
+                            {{ ball }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Bowler -->
+                <div class="bg-gray-100 p-3 rounded flex items-center gap-3">
+                    <img :src="bowler?.image || placeholder" class="w-10 h-10 rounded-full object-cover" />
+                    <div>
+                        <p class="text-sm font-semibold">{{ bowler?.name }}</p>
+                        <p class="text-xs text-gray-600">
+                            {{ bowler?.overs }} - {{ bowler?.runs }} - {{ bowler?.wickets }}
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT: Scoreboard & Probability -->
+            <div class="space-y-6">
+
+                <!-- Scoreboard -->
+                <div class="bg-gray-50 p-4 rounded">
+                    <p class="text-lg font-semibold mb-2">Score</p>
+                    <p class="text-2xl font-bold">
+                        {{ scoreboard?.runs }}/{{ scoreboard?.wickets }}
+                    </p>
+                    <p class="text-sm text-gray-600">
+                        Overs: {{ scoreboard?.overs }}
+                    </p>
+                </div>
+
+                <!-- Projected Score -->
+                <div class="bg-gray-50 p-4 rounded">
+                    <p class="text-lg font-semibold mb-2">
+                        Projected Score
+                        <span class="text-sm text-gray-500">(as per RR)</span>
+                    </p>
+                    <p class="text-xl font-bold">
+                        {{ scoreboard?.projected_score }}
+                    </p>
+                </div>
+
+                <!-- Win Probability -->
+                <div class="bg-gray-50 p-4 rounded">
+                    <p class="text-lg font-semibold mb-3">Win Probability</p>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span>{{ probability?.team_a?.name }}</span>
+                            <span>{{ probability?.team_a?.percent }}%</span>
+                        </div>
+
+                        <div class="w-full h-2 bg-gray-200 rounded overflow-hidden">
+                            <div class="h-full bg-green-500" :style="{ width: probability?.team_a?.percent + '%' }">
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between text-sm mt-2">
+                            <span>{{ probability?.team_b?.name }}</span>
+                            <span>{{ probability?.team_b?.percent }}%</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 </template>
 
+
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { computed } from 'vue'
+
+
+const isEmptyObject = (obj) => !obj || Object.keys(obj).length === 0;
 
 const props = defineProps({
-    battingTeam: {
-        type: Object,
-        required: false
-    },
+    striker: Object,
+    nonStriker: Object,
+    bowler: Object,
+    currentOver: Object,
+    scoreboard: Object,
+    probability: Object,
+})
+
+const placeholder = 'https://cricketvectors.akamaized.net/players/org/CD.png'
+
+const isMatchNotStarted = computed(() => {
+    return (
+        isEmptyObject(props.striker.value) &&
+        isEmptyObject(props.nonStriker.value) &&
+        isEmptyObject(props.bowler.value) &&
+        isEmptyObject(props.currentOver.value) &&
+        isEmptyObject(props.scoreboard.value) &&
+        isEmptyObject(props.probability.value)
+    );
 });
-
-const pointGroups = ref([]);
-const pointsTable = ref({});
-const activeGroup = ref('');
-
-watch(() => props.tournament, (tournament) => {
-    if (tournament && tournament.points_table) {
-        pointGroups.value = tournament.points_table.map(group => group.group_name);
-        activeGroup.value = pointGroups.value[0] || '';
-        
-        const table = {};
-        tournament.points_table.forEach(group => {
-            table[group.group_name] = group.teams.map(team => ({
-                name: team.team_name || team.name,
-                p: team.p || 0,
-                w: team.w || 0,
-                l: team.l || 0,
-                nrr: team.nrr || '0.00',
-                pts: team.pts || 0,
-            }));
-        });
-        pointsTable.value = table;
-    }
-}, { immediate: true });
+const ballClass = (ball) => {
+    if (ball === 'W') return 'bg-red-500 text-white'
+    if (ball === '6') return 'bg-green-500 text-white'
+    if (ball === '4') return 'bg-blue-500 text-white'
+    return 'bg-gray-200'
+}
 </script>

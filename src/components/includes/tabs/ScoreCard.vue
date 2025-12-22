@@ -24,6 +24,10 @@ const props = defineProps({
     match: {
         type: Object,
         required: true
+    },
+    yetToBatList: {
+        type: Object,
+        required: false
     }
 });
 

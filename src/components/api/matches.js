@@ -52,9 +52,8 @@ export const fetchTeamInfo = async (id) => {
 }
 
 
-export const fetchCricketMatchTeamData = async (payload) => {
+export const fetchCricketMatchData = async (payload) => {
     try {
-        console.log("Payload: ", payload);
         const res = await apiClient.get(
             endpoints.matches.liveData,
             {
