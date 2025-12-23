@@ -171,7 +171,7 @@
         <div>
             <MatchInfo v-if="activeTab === 'Match Info'" :tournament="match.tournament ?? null" :match="match" />
             <LiveScore v-if="activeTab === 'Live'" :striker="striker" :nonStriker="nonStriker" :bowler="bowler" :currentOver="currentOver" :scoreboard="scoreboard" :probability="probability"/>
-            <ScoreCard v-if="activeTab === 'Scorecard'" :match="match" :yetToBatList="yetToBatList" />
+            <ScoreCard v-if="activeTab === 'Scorecard'" :match="match" :yetToBatList="yetToBatList" :scoreboard="scoreboard"/>
         </div>
     </div>
 </template>
@@ -326,18 +326,23 @@ const onImageError = (event, teamType) => {
     event.target.style.display = 'none';
 };
 
-const updateMatchData = async () => {
-    const response = await fetchCricketMatchData({match_id: match.value.id});
+const updateMatchData = async (tossData) => {
+    const response = await fetchCricketMatchData({
+        match_id: match.value.id,
+        batting_team: tossData.batting_first_team_id,
+        bowling_team: tossData.bowling_first_team_id,
+    });
 
     if(response.success){
-        battingTeam.value = response.data.battingTeam;
-        bowlingTeam.value = response.data.bowlingTeam;
-        scoreboard.value  = response.data.scoreboard;
-        striker.value     = response.data.striker;
-        nonStriker.value  = response.data.nonStriker;
-        bowler.value      = response.data.bowler;
-        currentOver.value = response.data.currentOver;
-        probability.value = response.data.probability;
+        battingTeam.value = response.matchData.battingTeam;
+        bowlingTeam.value = response.matchData.bowlingTeam;
+        scoreboard.value  = response.matchData.scoreboard;
+        striker.value     = response.matchData.striker;
+        nonStriker.value  = response.matchData.nonStriker;
+        bowler.value      = response.matchData.bowler;
+        currentOver.value = response.matchData.currentOver;
+        probability.value = response.matchData.probability;
+        yetToBatList.value= response.matchData.yetToBatList;
     }
 }
 
@@ -346,7 +351,7 @@ const showTossNotification = (tossData) => {
 
     tossNotified.value = true;
 
-    updateMatchData();
+    updateMatchData(tossData);
 
     const tossWinnerName =
         tossData.toss_winner_team_id === match.value.team_a?.id

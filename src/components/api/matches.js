@@ -67,3 +67,19 @@ export const fetchCricketMatchData = async (payload) => {
         return null;
     }
 };
+
+export const fetchMatchScorecard = async (payload) => {
+    try {
+        const res = await apiClient.get(
+            endpoints.matches.scorecard,
+            {
+                params: payload
+            }
+        );
+
+        return res.data;
+    } catch (error) {
+        console.error('Failed to load team data:', error);
+        return null;
+    }
+}

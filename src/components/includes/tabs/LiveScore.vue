@@ -145,14 +145,15 @@ const placeholder = 'https://cricketvectors.akamaized.net/players/org/CD.png'
 
 const isMatchNotStarted = computed(() => {
     return (
-        isEmptyObject(props.striker.value) &&
-        isEmptyObject(props.nonStriker.value) &&
-        isEmptyObject(props.bowler.value) &&
-        isEmptyObject(props.currentOver.value) &&
-        isEmptyObject(props.scoreboard.value) &&
-        isEmptyObject(props.probability.value)
-    );
+        isEmptyObject(props.striker) &&
+        isEmptyObject(props.nonStriker) &&
+        isEmptyObject(props.bowler) &&
+        isEmptyObject(props.currentOver) &&
+        isEmptyObject(props.scoreboard) &&
+        isEmptyObject(props.probability)
+    )
 });
+
 const ballClass = (ball) => {
     if (ball === 'W') return 'bg-red-500 text-white'
     if (ball === '6') return 'bg-green-500 text-white'
