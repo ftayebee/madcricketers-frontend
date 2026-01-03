@@ -31,34 +31,57 @@
                             </div>
 
                             <div v-if="imageSrc">
-                                <!-- Vue Picture Cropper -->
-                                <vue-picture-cropper :boxStyle="{
-                                    width: '100%',
-                                    height: '400px',
-                                    backgroundColor: '#f8f8f8',
-                                    borderRadius: '8px'
-                                }" :img="imageSrc" :options="cropperOptions" @ready="onCropperReady" @crop="onCrop"
-                                    class="cropper-container mb-4" />
+                                <!-- Vue Cropper Component -->
+                                <vue-cropper ref="cropperRef" :src="imageSrc" :aspect-ratio="1" :view-mode="2"
+                                    :background="false" :auto-crop-area="0.8" :drag-mode="'crop'" :guides="true"
+                                    :center="true" :highlight="true" :responsive="true" :restore="true"
+                                    :check-cross-origin="false" @ready="onReady" class="cropper-container" />
 
-                                <div class="flex flex-wrap gap-2 mb-4">
-                                    <button type="button" @click="onCrop"
-                                        class="px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm">
-                                        Save Cropped Image
+                                <div class="flex flex-wrap gap-2 mb-4 mt-4">
+                                    <button type="button" @click="cropImage"
+                                        class="px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm">
+                                        Crop Image
+                                    </button>
+                                    <button type="button" @click="rotateLeft"
+                                        class="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">
+                                        ↺ Rotate Left
+                                    </button>
+                                    <button type="button" @click="rotateRight"
+                                        class="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">
+                                        ↻ Rotate Right
+                                    </button>
+                                    <button type="button" @click="resetCrop"
+                                        class="px-3 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm">
+                                        Reset Crop
                                     </button>
                                     <button type="button" @click="removeImage"
                                         class="px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm">
                                         Remove Image
                                     </button>
-                                    <input type="file" @change="uploadImage" accept="image/*" class="hidden"
-                                        ref="fileInput" />
                                     <button type="button" @click="triggerFileInput"
-                                        class="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">
+                                        class="px-3 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 text-sm">
                                         Change Image
                                     </button>
                                 </div>
 
-                                <div v-if="croppedImage" class="mt-4 p-3 bg-gray-50 rounded">
-                                    <p class="text-sm text-gray-600">✓ Image cropped and ready for upload</p>
+                                <!-- Preview -->
+                                <div v-if="croppedImageUrl" class="mt-4 p-4 bg-gray-50 rounded border">
+                                    <p class="text-sm font-medium text-gray-700 mb-2">Cropped Preview:</p>
+                                    <div class="flex flex-col md:flex-row items-start gap-4">
+                                        <img :src="croppedImageUrl" alt="Cropped Preview"
+                                            class="w-32 h-32 object-cover rounded border" />
+                                        <div>
+                                            <p class="text-sm text-green-600 font-medium">
+                                                ✓ Image cropped and ready for upload
+                                            </p>
+                                            <p class="text-xs text-gray-500 mt-1">
+                                                Size: {{ formatFileSize(croppedBlob?.size || 0) }}
+                                            </p>
+                                            <p class="text-xs text-gray-500">
+                                                Dimensions: 300 × 300 pixels
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -66,7 +89,7 @@
                         <p class="text-gray-500 text-xs mt-1">Recommended: Square image, max 2MB (JPEG, PNG, WebP)</p>
                     </div>
 
-                    <!-- Rest of your form fields (keep them exactly as they were) -->
+                    <!-- Rest of your form fields -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block font-medium mb-1">Full Name *</label>
@@ -74,7 +97,7 @@
                                 class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
                                 required />
                             <span v-if="errors.full_name" class="text-red-500 text-sm mt-1">{{ errors.full_name[0]
-                                }}</span>
+                            }}</span>
                         </div>
 
                         <div>
@@ -82,7 +105,7 @@
                             <input v-model="form.nickname" type="text"
                                 class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300" />
                             <span v-if="errors.nickname" class="text-red-500 text-sm mt-1">{{ errors.nickname[0]
-                                }}</span>
+                            }}</span>
                         </div>
 
                         <div>
@@ -99,7 +122,7 @@
                                 class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
                                 required />
                             <span v-if="errors.password" class="text-red-500 text-sm mt-1">{{ errors.password[0]
-                                }}</span>
+                            }}</span>
                         </div>
 
                         <div>
@@ -125,7 +148,7 @@
                                 <option value="O-">O-</option>
                             </select>
                             <span v-if="errors.blood_group" class="text-red-500 text-sm mt-1">{{ errors.blood_group[0]
-                                }}</span>
+                            }}</span>
                         </div>
 
                         <div>
@@ -161,7 +184,7 @@
                                 <option value="other">Other</option>
                             </select>
                             <span v-if="errors.religion" class="text-red-500 text-sm mt-1">{{ errors.religion[0]
-                                }}</span>
+                            }}</span>
                         </div>
 
                         <div>
@@ -169,7 +192,7 @@
                             <input v-model="form.national_id" type="text"
                                 class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300" />
                             <span v-if="errors.national_id" class="text-red-500 text-sm mt-1">{{ errors.national_id[0]
-                                }}</span>
+                            }}</span>
                         </div>
                     </div>
 
@@ -194,7 +217,7 @@
                             </select>
                             <input type="hidden" name="player_type" v-model="form.player_type" />
                             <span v-if="errors.player_type" class="text-red-500 text-sm mt-1">{{ errors.player_type[0]
-                                }}</span>
+                            }}</span>
                         </div>
 
                         <div>
@@ -208,7 +231,7 @@
                                 <option value="wicketkeeper">Wicket Keeper</option>
                             </select>
                             <span v-if="errors.player_role" class="text-red-500 text-sm mt-1">{{ errors.player_role[0]
-                                }}</span>
+                            }}</span>
                         </div>
 
                         <div>
@@ -253,7 +276,7 @@
                                 class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
                                 placeholder="e.g., Al-Amin" />
                             <span v-if="errors.jursey_name" class="text-red-500 text-sm mt-1">{{ errors.jursey_name[0]
-                                }}</span>
+                            }}</span>
                         </div>
 
                         <div>
@@ -289,7 +312,7 @@
                                 </label>
                             </div>
                             <span v-if="errors.jursey_size" class="text-red-500 text-sm mt-1">{{ errors.jursey_size[0]
-                                }}</span>
+                            }}</span>
                         </div>
 
                         <div>
@@ -316,47 +339,18 @@
 
 <script setup>
 import bgHome from './../../assets/bg/bg-home.png'
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { useToast } from "vue-toastification"
 import axios from 'axios'
 import flatPickr from 'vue-flatpickr-component'
 import 'flatpickr/dist/flatpickr.css'
 import { API_BASE_URL } from '../api/config'
-
-// Import vue-picture-cropper - NO CSS IMPORT NEEDED
-import VuePictureCropper from 'vue-picture-cropper'
+import { useRouter } from 'vue-router'
+import VueCropper from 'vue-cropperjs'
+import 'cropperjs/dist/cropper.css'
 
 const toast = useToast()
-
-// Cropper options
-const cropperOptions = reactive({
-    viewMode: 1,
-    dragMode: 'crop',
-    aspectRatio: 1,
-    movable: true,
-    rotatable: true,
-    scalable: true,
-    zoomable: true,
-    zoomOnTouch: true,
-    zoomOnWheel: true,
-    cropBoxMovable: true,
-    cropBoxResizable: true,
-    toggleDragModeOnDblclick: true,
-    background: false,
-    responsive: true,
-    restore: true,
-    checkCrossOrigin: false,
-    checkOrientation: false,
-    modal: true,
-    guides: true,
-    center: true,
-    highlight: true,
-    autoCrop: true,
-    autoCropArea: 0.8,
-    crop: () => {
-        // This will be called during cropping
-    }
-})
+const router = useRouter();
 
 const flatpickrConfig = {
     enableTime: false,
@@ -390,19 +384,93 @@ const form = reactive({
 })
 
 const fileInput = ref(null)
-const imageSrc = ref(null)
+const imageSrc = ref('')
 const imageFile = ref(null)
-const croppedImage = ref(null)
-const cropperInstance = ref(null)
+const cropperRef = ref(null)
+const croppedImageUrl = ref('')
+const croppedBlob = ref(null)
 const errors = reactive({})
 
 const triggerFileInput = () => {
     fileInput.value.click()
 }
 
+// Cropper ready event
+const onReady = () => {
+    console.log('Cropper is ready')
+    toast.info("Adjust the crop area, then click 'Crop Image'")
+}
+
+// Crop image function
+const cropImage = () => {
+    if (!cropperRef.value) {
+        toast.error("Cropper not ready yet")
+        return
+    }
+
+    try {
+        // Get cropped canvas
+        const canvas = cropperRef.value.getCroppedCanvas({
+            width: 300,
+            height: 300,
+            fillColor: '#fff',
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high'
+        })
+
+        if (!canvas) {
+            toast.error("Could not get canvas. Try adjusting the crop area.")
+            return
+        }
+
+        // Convert canvas to blob
+        canvas.toBlob((blob) => {
+            if (blob) {
+                croppedBlob.value = blob
+
+                // Create object URL for preview
+                if (croppedImageUrl.value) {
+                    URL.revokeObjectURL(croppedImageUrl.value)
+                }
+                croppedImageUrl.value = URL.createObjectURL(blob)
+
+                toast.success("Image cropped successfully!")
+                console.log('Cropped image size:', formatFileSize(blob.size))
+            } else {
+                toast.error("Failed to create image blob")
+            }
+        }, 'image/jpeg', 0.9)
+
+    } catch (error) {
+        console.error('Crop error:', error)
+        toast.error("Error cropping image: " + error.message)
+    }
+}
+
+// Rotate functions
+const rotateLeft = () => {
+    if (cropperRef.value) {
+        cropperRef.value.rotate(-90)
+    }
+}
+
+const rotateRight = () => {
+    if (cropperRef.value) {
+        cropperRef.value.rotate(90)
+    }
+}
+
+// Reset crop
+const resetCrop = () => {
+    if (cropperRef.value) {
+        cropperRef.value.reset()
+        toast.info("Crop area reset")
+    }
+}
+
+// Upload image
 const uploadImage = async (event) => {
     const file = event.target.files[0]
-
     if (!file) return
 
     // Validate file size (12MB)
@@ -413,20 +481,26 @@ const uploadImage = async (event) => {
     }
 
     // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
     if (!allowedTypes.includes(file.type)) {
-        toast.error("Only JPEG, PNG, WebP, and GIF images are allowed")
+        toast.error("Only JPEG, PNG, and WebP images are allowed")
         resetFileInput()
         return
     }
 
-    // Read file as data URL
+    // Reset states
+    if (croppedImageUrl.value) {
+        URL.revokeObjectURL(croppedImageUrl.value)
+    }
+    croppedImageUrl.value = ''
+    croppedBlob.value = null
+
+    // Read file
     const reader = new FileReader()
     reader.onload = (e) => {
         imageSrc.value = e.target.result
         imageFile.value = file
-        croppedImage.value = null
-        toast.success("Image loaded successfully. You can now crop it.")
+        toast.success("Image loaded. Adjust the crop area.")
     }
     reader.onerror = () => {
         toast.error("Error reading file")
@@ -443,64 +517,19 @@ const resetFileInput = () => {
     }
 }
 
-const onCropperReady = (cropper) => {
-    cropperInstance.value = cropper
-    console.log('Cropper is ready')
-}
-
-const onCrop = (event) => {
-    if (cropperInstance.value) {
-        try {
-            // Get cropped canvas
-            const canvas = cropperInstance.value.getCroppedCanvas({
-                width: 300,
-                height: 300,
-                fillColor: '#fff',
-                imageSmoothingEnabled: true,
-                imageSmoothingQuality: 'high'
-            })
-
-            if (canvas) {
-                canvas.toBlob((blob) => {
-                    if (blob) {
-                        croppedImage.value = blob
-                        console.log('Image cropped successfully', blob.size)
-                    } else {
-                        console.error('Failed to create blob')
-                    }
-                }, 'image/jpeg', 0.8)
-            }
-        } catch (error) {
-            console.error('Error during cropping:', error)
-        }
-    }
-}
-
-const rotate = (degrees) => {
-    if (cropperInstance.value) {
-        cropperInstance.value.rotate(degrees)
-        // Trigger crop after rotation
-        setTimeout(() => {
-            onCrop()
-        }, 100)
-    }
-}
-
-const resetCropper = () => {
-    if (cropperInstance.value) {
-        cropperInstance.value.reset()
-        croppedImage.value = null
-    }
-}
-
+// Remove image
 const removeImage = () => {
-    imageSrc.value = null
+    if (croppedImageUrl.value) {
+        URL.revokeObjectURL(croppedImageUrl.value)
+    }
+    imageSrc.value = ''
     imageFile.value = null
-    croppedImage.value = null
-    cropperInstance.value = null
+    croppedImageUrl.value = ''
+    croppedBlob.value = null
     toast.info("Image removed")
 }
 
+// Format file size
 const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes'
     const k = 1024
@@ -526,7 +555,7 @@ const submitForm = async () => {
         return
     }
 
-    if (!croppedImage.value) {
+    if (!croppedBlob.value) {
         toast.error("Please crop your image before submitting.")
         return
     }
@@ -544,7 +573,7 @@ const submitForm = async () => {
     })
 
     // Add cropped image
-    formData.append('image', croppedImage.value, 'profile-picture.jpg')
+    formData.append('image', croppedBlob.value, 'profile-picture.jpg')
 
     // Add original filename for reference
     formData.append('original_filename', imageFile.value.name)
@@ -555,18 +584,20 @@ const submitForm = async () => {
                 'Content-Type': 'multipart/form-data',
                 'Accept': 'application/json'
             },
-            timeout: 30000 // 30 second timeout
+            timeout: 30000
         })
 
         resetForm()
         toast.success(response.data.message || "Player Registration successful")
 
-        // Optional: Redirect after successful registration
-        // router.push('/success')
+        if (response.data.reg_uid) {
+            router.push(`/registration-confirmation/${response.data.reg_uid}`)
+        } else {
+            router.push('/registration-confirmation/success')
+        }
 
     } catch (err) {
         if (err.response?.status === 422) {
-            // Laravel validation errors
             Object.assign(errors, err.response.data.errors)
             toast.error("Please fix the highlighted errors")
         } else if (err.response?.status === 413) {
@@ -583,10 +614,17 @@ const submitForm = async () => {
     }
 }
 
+// Clean up object URLs on unmount
+onUnmounted(() => {
+    if (croppedImageUrl.value) {
+        URL.revokeObjectURL(croppedImageUrl.value)
+    }
+})
+
 // Initialize on component mount
 onMounted(() => {
     // You can set an initial image URL here if needed
-    // initialImage.value = 'path/to/default/image.jpg'
+    // imageSrc.value = 'path/to/default/image.jpg'
 })
 </script>
 
@@ -628,11 +666,39 @@ onMounted(() => {
 }
 
 /* Cropper container styling */
-.cropper-container {
+:deep(.cropper-container) {
+    width: 100%;
+    height: 400px;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Cropper.js custom styles */
+:deep(.cropper-view-box),
+:deep(.cropper-face) {
+    border-radius: 50%;
+}
+
+:deep(.cropper-view-box) {
+    outline: 2px solid #3b82f6;
+    outline-color: rgba(59, 130, 246, 0.75);
+}
+
+:deep(.cropper-line) {
+    background-color: #3b82f6;
+}
+
+:deep(.cropper-point) {
+    background-color: #3b82f6;
+    width: 8px;
+    height: 8px;
+}
+
+:deep(.cropper-point.point-se) {
+    width: 12px;
+    height: 12px;
 }
 
 /* Form input focus styles */
@@ -668,34 +734,8 @@ select:focus {
         min-width: 2.5rem;
     }
 
-    .cropper-container {
+    :deep(.cropper-container) {
         height: 300px !important;
     }
-}
-
-/* Cropper.js custom styles */
-:deep(.cropper-view-box),
-:deep(.cropper-face) {
-    border-radius: 50%;
-}
-
-:deep(.cropper-view-box) {
-    outline: 2px solid #3b82f6;
-    outline-color: rgba(59, 130, 246, 0.75);
-}
-
-:deep(.cropper-line) {
-    background-color: #3b82f6;
-}
-
-:deep(.cropper-point) {
-    background-color: #3b82f6;
-    width: 8px;
-    height: 8px;
-}
-
-:deep(.cropper-point.point-se) {
-    width: 12px;
-    height: 12px;
 }
 </style>

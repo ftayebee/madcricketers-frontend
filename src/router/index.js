@@ -8,6 +8,7 @@ import Players from "../components/pages/Players.vue";
 import PlayerProfile from "../components/pages/PlayerProfile.vue";
 import Fixtures from "../components/pages/Fixtures.vue";
 import Contact from "../components/pages/Contact.vue";
+import RegistrationConfirmation from "../components/pages/RegistrationConfirmation.vue";
 
 const routes = [
   { path: "/", component: Homepage },
@@ -19,6 +20,7 @@ const routes = [
   { path: "/players", component: Players },
   { path: "/players/:slug", component: PlayerProfile},
   { path: "/contact-us", component: Contact},
+  { path: "/registration-confirmation/:reg_uid", component: RegistrationConfirmation, props: true },
   { path: "/:pathMatch(.*)*", redirect: "/", },
 ];
 
