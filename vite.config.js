@@ -7,6 +7,6 @@ export default defineConfig({
     port: 5174,
   },
   optimizeDeps: {
-    include: ['vue', 'vue-router', 'vue-toastification', 'axios', 'vue-picture-cropper']
+    include: ['vue', 'vue-router', 'vue-toastification', 'axios', 'vue-cropperjs']
   },
 });
