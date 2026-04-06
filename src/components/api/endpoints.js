@@ -8,6 +8,7 @@ export default {
         scorecard: "/matches/scorecard",
         detail: (slug) => `/matches/detail/${slug}`,
         teamInfo: (id) => `/matches/detail/team-info/${id}`,
+        yetToBat: (id) => `/matches/yet-to-bat/${id}`,
     },
     tournaments: {
         all: "/tournaments",

@@ -180,7 +180,7 @@
 import bgHome from './../../assets/bg/bg-home.png'
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { fetchMatchBySlug, fetchCricketMatchData } from './../api/matches'
+import { fetchMatchBySlug, fetchCricketMatchData, fetchYetToBat } from './../api/matches'
 import MatchInfo from '../includes/tabs/MatchInfo.vue'
 import LiveScore from '../includes/tabs/LiveScore.vue'
 import ScoreCard from '../includes/tabs/ScoreCard.vue'
@@ -497,7 +497,12 @@ onMounted(async () => {
 
         if (match.value.status === 'live') {
             activeTab.value = 'Live';
-            updateMatchData(); // Fetch live data on mount
+            updateMatchData();
+        } else {
+            const yetToBatRes = await fetchYetToBat(match.value.id);
+            if (yetToBatRes && yetToBatRes.success) {
+                yetToBatList.value = yetToBatRes.players;
+            }
         }
 
         setupRealTimeListeners();

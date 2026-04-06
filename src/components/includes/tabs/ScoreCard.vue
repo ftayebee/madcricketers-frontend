@@ -124,11 +124,11 @@
             <div v-if="yetToBatList?.length">
                 <div v-for="(player, idx) in yetToBatList" :key="idx"
                     class="bg-gray-100 p-2 rounded flex items-center gap-3 border border-gray-400 mb-2">
-                    <img :src="player.player?.image || 'https://via.placeholder.com/40'" alt="Player Image"
+                    <img :src="player.player?.image || player.image || 'https://via.placeholder.com/40'" alt="Player Image"
                         class="w-10 h-10 rounded-full object-cover" @error="$event.target.src = 'https://via.placeholder.com/40'"/>
                     <div>
-                        <p class="text-sm font-medium text-gray-800 mb-1">{{ player.player?.user?.full_name || player.name }}</p>
-                        <p class="text-xs text-gray-600 m-0">{{ formatRole(player.player?.player_role || player.role) }}</p>
+                        <p class="text-sm font-medium text-gray-800 mb-1">{{ player.player?.user?.full_name || player.user?.full_name || player.full_name || player.name }}</p>
+                        <p class="text-xs text-gray-600 m-0">{{ formatRole(player.player?.player_role || player.player_role || player.role) }}</p>
                     </div>
                 </div>
             </div>

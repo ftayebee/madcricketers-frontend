@@ -83,3 +83,13 @@ export const fetchMatchScorecard = async (payload) => {
         return null;
     }
 }
+
+export const fetchYetToBat = async (id) => {
+    try {
+        const res = await apiClient.get(endpoints.matches.yetToBat(id));
+        return res.data;
+    } catch (error) {
+        console.error(`Failed to load yet to bat for match ${id}:`, error);
+        return null;
+    }
+};
