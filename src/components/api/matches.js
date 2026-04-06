@@ -4,7 +4,7 @@ import endpoints from "./endpoints";
 export const fetchLiveMatches = async () => {
     try {
         const res = await apiClient.get(endpoints.matches.live);
-        return res.data.data;
+        return res.data?.data || [];
     } catch (error) {
         console.error("Failed to load live matches:", error);
         return [];
@@ -14,7 +14,7 @@ export const fetchLiveMatches = async () => {
 export const fetchCompletedMatches = async () => {
     try {
         const res = await apiClient.get(endpoints.matches.completed);
-        return res.data.data;
+        return res.data?.data || [];
     } catch (error) {
         console.error("Failed to load completed matches:", error);
         return [];
@@ -24,7 +24,7 @@ export const fetchCompletedMatches = async () => {
 export const fetchUpcomingMatches = async () => {
     try {
         const res = await apiClient.get(endpoints.matches.upcoming);
-        return res.data.data;
+        return res.data?.data || [];
     } catch (error) {
         console.error("Failed to load completed matches:", error);
         return [];
@@ -34,7 +34,7 @@ export const fetchUpcomingMatches = async () => {
 export const fetchMatchBySlug = async (slug) => {
     try {
         const res = await apiClient.get(endpoints.matches.detail(slug));
-        return res.data.data;
+        return res.data?.data || null;
     } catch (error) {
         console.error(`Failed to load match with slug ${slug}:`, error);
         return null;

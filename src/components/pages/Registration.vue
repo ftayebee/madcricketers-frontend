@@ -194,6 +194,56 @@
                             <span v-if="errors.national_id" class="text-red-500 text-sm mt-1">{{ errors.national_id[0]
                             }}</span>
                         </div>
+
+                        <div>
+                            <label class="block font-medium mb-1">Favourite Football Country</label>
+                            <input v-model="form.favourite_football_country" type="text"
+                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300" />
+                            <span v-if="errors.favourite_football_country" class="text-red-500 text-sm mt-1">{{ errors.favourite_football_country[0] }}</span>
+                        </div>
+
+                        <div>
+                            <label class="block font-medium mb-1">Favourite Cricket Country</label>
+                            <input v-model="form.favourite_cricket_country" type="text"
+                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300" />
+                            <span v-if="errors.favourite_cricket_country" class="text-red-500 text-sm mt-1">{{ errors.favourite_cricket_country[0] }}</span>
+                        </div>
+
+                        <div>
+                            <label class="block font-medium mb-1">Favourite Football League Team</label>
+                            <input v-model="form.favourite_football_league_team" type="text"
+                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300" />
+                            <span v-if="errors.favourite_football_league_team" class="text-red-500 text-sm mt-1">{{ errors.favourite_football_league_team[0] }}</span>
+                        </div>
+
+                        <div>
+                            <label class="block font-medium mb-1">Married Status</label>
+                            <select v-model="form.married_status"
+                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300">
+                                <option value="">Select Status</option>
+                                <option value="single">Single</option>
+                                <option value="married">Married</option>
+                                <option value="divorced">Divorced</option>
+                                <option value="widowed">Widowed</option>
+                            </select>
+                            <span v-if="errors.married_status" class="text-red-500 text-sm mt-1">{{ errors.married_status[0] }}</span>
+                        </div>
+
+                        <div>
+                            <label class="block font-medium mb-1">Education Batch Filter</label>
+                            <input v-model="form.education_batch" type="text"
+                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
+                                placeholder="e.g., 2018-2022" />
+                            <span v-if="errors.education_batch" class="text-red-500 text-sm mt-1">{{ errors.education_batch[0] }}</span>
+                        </div>
+
+                        <div>
+                            <label class="block font-medium mb-1">SSC Batch Field</label>
+                            <input v-model="form.ssc_batch" type="text"
+                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
+                                placeholder="e.g., 2018" />
+                            <span v-if="errors.ssc_batch" class="text-red-500 text-sm mt-1">{{ errors.ssc_batch[0] }}</span>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-1 gap-6 my-3">
@@ -380,7 +430,13 @@ const form = reactive({
     jursey_number: '',
     jursey_name: '',
     jursey_size: '',
-    chest_measurement: ''
+    chest_measurement: '',
+    favourite_football_country: '',
+    favourite_cricket_country: '',
+    favourite_football_league_team: '',
+    married_status: '',
+    education_batch: '',
+    ssc_batch: ''
 })
 
 const fileInput = ref(null)

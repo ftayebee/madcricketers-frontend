@@ -52,16 +52,16 @@
                                 <div class="mb-3">
                                     <span :class="[
                                         'inline-block px-3 py-1 text-xs font-semibold rounded-full',
-                                        match.status === 'live' ? 'bg-red-500 text-white' :
-                                            match.status === 'completed' ? 'bg-green-500 text-white' :
+                                        match?.status === 'live' ? 'bg-red-500 text-white' :
+                                            match?.status === 'completed' ? 'bg-green-500 text-white' :
                                                 'bg-yellow-500 text-white'
                                     ]">
-                                        {{ match.status?.toUpperCase() || 'UPCOMING' }}
+                                        {{ match?.status?.toUpperCase() || 'UPCOMING' }}
                                     </span>
                                 </div>
 
                                 <!-- Innings started -->
-                                <div v-if="match.status === 'live' && isInningsStarted">
+                                <div v-if="match?.status === 'live' && isInningsStarted">
                                     <div class="text-lg font-bold text-yellow-300 mb-1">
                                         {{ getRequiredRunRate() }} RRR
                                     </div>
@@ -71,7 +71,7 @@
                                 </div>
 
                                 <!-- Toss completed but innings not started -->
-                                <div v-else-if="match.status === 'live' && match.toss">
+                                <div v-else-if="match?.status === 'live' && match?.toss">
                                     <div class="text-sm text-yellow-300 font-medium toss-indicator">
                                         {{ tossInfo }}
                                     </div>
@@ -84,13 +84,13 @@
                                 </div>
 
                                 <!-- Toss running -->
-                                <div v-else-if="match.status === 'live'">
+                                <div v-else-if="match?.status === 'live'">
                                     <div class="text-lg font-bold text-yellow-300">
                                         Toss Running
                                     </div>
                                 </div>
 
-                                <div v-else-if="match.status === 'completed'">
+                                <div v-else-if="match?.status === 'completed'">
                                     <div class="text-lg font-bold text-green-300">
                                         {{ getMatchResult() }}
                                     </div>
@@ -98,12 +98,12 @@
 
                                 <div v-else>
                                     <div class="text-sm text-gray-300">
-                                        {{ formatMatchDateTime(match.date, match.match_time) }}
+                                        {{ formatMatchDateTime(match?.date, match?.match_time) }}
                                     </div>
                                 </div>
 
                                 <div class="text-xs text-gray-400 mt-2">
-                                    {{ match.venue || 'Rajshahi' }}
+                                    {{ match?.venue || 'Rajshahi' }}
                                 </div>
                             </div>
                         </div>
@@ -158,7 +158,7 @@
                                 : 'text-gray-200 hover:text-gray-300'
                         ]">
                             {{ tab }}
-                            <span v-if="tab === 'Live' && match.status === 'live'"
+                            <span v-if="tab === 'Live' && match?.status === 'live'"
                                 class="ml-2 w-2 h-2 bg-red-500 rounded-full inline-block animate-pulse"></span>
                         </button>
                     </div>
@@ -168,10 +168,10 @@
     </section>
 
     <div class="min-h-screen">
-        <div>
-            <MatchInfo v-if="activeTab === 'Match Info'" :tournament="match.tournament ?? null" :match="match" />
+        <div v-if="match">
+            <MatchInfo v-if="activeTab === 'Match Info'" :tournament="match?.tournament ?? null" :match="match" />
             <LiveScore v-if="activeTab === 'Live'" :striker="striker" :nonStriker="nonStriker" :bowler="bowler" :currentOver="currentOver" :scoreboard="scoreboard" :probability="probability"/>
-            <ScoreCard v-if="activeTab === 'Scorecard'" :match="match" :yetToBatList="yetToBatList" :scoreboard="scoreboard"/>
+            <ScoreCard v-if="activeTab === 'Scorecard'" :match="match" :yetToBatList="yetToBatList" :scoreboard="match?.scoreboard"/>
         </div>
     </div>
 </template>
@@ -209,16 +209,17 @@ const activeTab     = ref('Match Info');
 const channel       = ref(null);
 const match_id      = route.params.id;
 const tossNotified  = ref(false);
+const loadingLiveData = ref(false);
 
 const isInningsStarted = computed(() => {
-    if (!currentInnings.value) return false;
-    return currentInnings.value.overs > 0;
+    if (!match.value || !currentInnings.value) return false;
+    return (currentInnings.value.overs || 0) > 0;
 });
 
 const currentInnings = computed(() => {
-    if (!match.value.innings || !Array.isArray(match.value.innings)) return null;
+    if (!match.value || !match.value.scoreboard || !Array.isArray(match.value.scoreboard)) return null;
 
-    const running = match.value.innings.find(i =>
+    const running = match.value.scoreboard.find(i =>
         ['running', 'in_progress'].includes(i.status)
     );
 
@@ -226,9 +227,9 @@ const currentInnings = computed(() => {
 });
 
 const battingFirstTeam = computed(() => {
-    if (!match.value.toss || !match.value.team_a || !match.value.team_b) return null;
+    if (!match.value || !match.value.toss || !match.value.team_a || !match.value.team_b) return null;
 
-    const tossDecision = match.value.toss.decision;
+    const tossDecision = match.value.toss.decision || match.value.toss.toss_decision;
     const tossWinnerId = match.value.toss.toss_winner_team_id;
 
     if (tossDecision === 'bat') {
@@ -244,20 +245,21 @@ const bowlingFirstTeam = computed(() => {
 });
 
 const tossInfo = computed(() => {
-    if (!match.value.toss || !match.value.team_a || !match.value.team_b) return null;
+    if (!match.value || !match.value.toss || !match.value.team_a || !match.value.team_b) return null;
 
     const tossWinner = match.value.team_a.id === match.value.toss.toss_winner_team_id
         ? match.value.team_a.name
         : match.value.team_b.name;
 
-    const decision = match.value.toss.decision === 'bat' ? 'batting' : 'bowling';
+    const tossDecision = match.value.toss.decision || match.value.toss.toss_decision;
+    const decision = tossDecision === 'bat' ? 'batting' : 'bowling';
 
     return `${tossWinner} won the toss & chose to ${decision}`;
 });
 
 // Methods for dynamic data display
 const getCurrentInningsScore = (teamType) => {
-    if (!currentInnings.value) return '0/0';
+    if (!match.value || !currentInnings.value) return '0/0';
 
     const teamId = teamType === 'team_a' ? match.value.team_a?.id : match.value.team_b?.id;
 
@@ -268,7 +270,7 @@ const getCurrentInningsScore = (teamType) => {
 };
 
 const getCurrentInningsOvers = (teamType) => {
-    if (!currentInnings.value) return '0.0';
+    if (!match.value || !currentInnings.value) return '0.0';
 
     const teamId = teamType === 'team_a' ? match.value.team_a?.id : match.value.team_b?.id;
 
@@ -279,7 +281,7 @@ const getCurrentInningsOvers = (teamType) => {
 };
 
 const getCurrentRunRate = (teamType) => {
-    if (!currentInnings.value) return '0.0';
+    if (!match.value || !currentInnings.value) return '0.0';
 
     const teamId = teamType === 'team_a' ? match.value.team_a?.id : match.value.team_b?.id;
 
@@ -290,10 +292,10 @@ const getCurrentRunRate = (teamType) => {
 };
 
 const getTotalScore = (teamType) => {
-    if (!match.value.innings || !Array.isArray(match.value.innings)) return '0';
+    if (!match.value || !match.value.scoreboard || !Array.isArray(match.value.scoreboard)) return '0';
 
     const teamId = teamType === 'team_a' ? match.value.team_a?.id : match.value.team_b?.id;
-    const teamInnings = match.value.innings.filter(inning => inning.batting_team_id === teamId);
+    const teamInnings = match.value.scoreboard.filter(inning => inning.batting_team_id === teamId);
 
     if (teamInnings.length === 0) return '0';
 
@@ -302,9 +304,9 @@ const getTotalScore = (teamType) => {
 };
 
 const getRequiredRunRate = () => {
-    if (!currentInnings.value || !match.value.innings || match.value.innings.length < 2) return '0.0';
+    if (!currentInnings.value || !match.value?.scoreboard || match.value.scoreboard.length < 2) return '0.0';
 
-    const firstInnings = match.value.innings[0];
+    const firstInnings = match.value.scoreboard[0];
     const target = (firstInnings.runs || 0) + 1;
     const currentRuns = currentInnings.value.runs || 0;
     const remainingRuns = target - currentRuns;
@@ -316,9 +318,9 @@ const getRequiredRunRate = () => {
 };
 
 const getTarget = () => {
-    if (!match.value.innings || match.value.innings.length < 2) return 0;
+    if (!match.value?.scoreboard || match.value.scoreboard.length < 2) return 0;
 
-    const firstInnings = match.value.innings[0];
+    const firstInnings = match.value.scoreboard[0];
     return (firstInnings.runs || 0) + 1;
 };
 
@@ -326,23 +328,58 @@ const onImageError = (event, teamType) => {
     event.target.style.display = 'none';
 };
 
-const updateMatchData = async (tossData) => {
-    const response = await fetchCricketMatchData({
-        match_id: match.value.id,
-        batting_team: tossData.batting_first_team_id,
-        bowling_team: tossData.bowling_first_team_id,
-    });
+const updateMatchData = async (tossData = null) => {
+    if (!match.value?.id) return;
+    
+    let battingTeamId = null;
+    let bowlingTeamId = null;
 
-    if(response.success){
-        battingTeam.value = response.matchData.battingTeam;
-        bowlingTeam.value = response.matchData.bowlingTeam;
-        scoreboard.value  = response.matchData.scoreboard;
-        striker.value     = response.matchData.striker;
-        nonStriker.value  = response.matchData.nonStriker;
-        bowler.value      = response.matchData.bowler;
-        currentOver.value = response.matchData.currentOver;
-        probability.value = response.matchData.probability;
-        yetToBatList.value= response.matchData.yetToBatList;
+    if (tossData) {
+        battingTeamId = tossData.batting_first_team_id;
+        bowlingTeamId = tossData.bowling_first_team_id;
+    } else if (match.value.toss) {
+        // If toss exists, determine who is batting first based on toss
+        const tossWinnerId = match.value.toss.toss_winner_team_id;
+        const decision = match.value.toss.decision || match.value.toss.toss_decision;
+        
+        if (decision === 'bat') {
+            battingTeamId = tossWinnerId === match.value.team_a_id ? match.value.team_a_id : match.value.team_b_id;
+            bowlingTeamId = tossWinnerId === match.value.team_a_id ? match.value.team_b_id : match.value.team_a_id;
+        } else {
+            battingTeamId = tossWinnerId === match.value.team_a_id ? match.value.team_b_id : match.value.team_a_id;
+            bowlingTeamId = tossWinnerId === match.value.team_a_id ? match.value.team_a_id : match.value.team_b_id;
+        }
+    } else if (currentInnings.value) {
+        // Fallback to current innings
+        battingTeamId = currentInnings.value.batting_team_id;
+        bowlingTeamId = currentInnings.value.batting_team_id === match.value.team_a_id ? match.value.team_b_id : match.value.team_a_id;
+    }
+
+    if (!battingTeamId || !bowlingTeamId) return;
+
+    loadingLiveData.value = true;
+    try {
+        const response = await fetchCricketMatchData({
+            match_id: match.value.id,
+            batting_team: battingTeamId,
+            bowling_team: bowlingTeamId,
+        });
+
+        if(response.success){
+            battingTeam.value = response.matchData.battingTeam;
+            bowlingTeam.value = response.matchData.bowlingTeam;
+            scoreboard.value  = response.matchData.scoreboard;
+            striker.value     = response.matchData.striker;
+            nonStriker.value  = response.matchData.nonStriker;
+            bowler.value      = response.matchData.bowler;
+            currentOver.value = response.matchData.currentOver;
+            probability.value = response.matchData.probability;
+            yetToBatList.value= response.matchData.yetToBatList;
+        }
+    } catch (error) {
+        console.error('Error updating live match data:', error);
+    } finally {
+        loadingLiveData.value = false;
     }
 }
 
@@ -371,7 +408,7 @@ const showTossNotification = (tossData) => {
 };
 
 const setupRealTimeListeners = () => {
-    if (!window.Echo || !match.value.id) {
+    if (!window.Echo || !match.value?.id) {
         console.error('❌ Echo or match ID not available');
         return;
     }
@@ -388,7 +425,41 @@ const setupRealTimeListeners = () => {
         .listen('.toss-updated', (data) => {
             handleTossEvent(data);
             showTossNotification(data);
+        })
+        .listen('.match-updated', (data) => {
+            handleMatchUpdate(data);
         });
+};
+
+const handleMatchUpdate = (data) => {
+    if (!data) return;
+
+    if (data.match) {
+        match.value.status = data.match.status || match.value.status;
+    }
+
+    if (data.scoreboard) {
+        // Sync with the general scoreboard ref used by LiveScore tab
+        scoreboard.value = { ...scoreboard.value, ...data.scoreboard };
+
+        // Also sync with the match object's scoreboard array (used by ScoreCard tab)
+        if (Array.isArray(match.value?.scoreboard)) {
+            const index = match.value.scoreboard.findIndex(i => i.id === data.scoreboard.id || i.innings === data.scoreboard.innings);
+            if (index !== -1) {
+                match.value.scoreboard[index] = { ...match.value.scoreboard[index], ...data.scoreboard };
+            } else {
+                match.value.scoreboard.push(data.scoreboard);
+            }
+        } else {
+            match.value.scoreboard = [data.scoreboard];
+        }
+    }
+
+    if (data.striker) striker.value = data.striker;
+    if (data.nonStriker) nonStriker.value = data.nonStriker;
+    if (data.currentBowler) bowler.value = data.currentBowler;
+    if (data.currentOver) currentOver.value = data.currentOver;
+    if (data.yetToBatList) yetToBatList.value = data.yetToBatList;
 };
 
 const handleTossEvent = (data) => {
@@ -426,6 +497,7 @@ onMounted(async () => {
 
         if (match.value.status === 'live') {
             activeTab.value = 'Live';
+            updateMatchData(); // Fetch live data on mount
         }
 
         setupRealTimeListeners();
@@ -435,7 +507,7 @@ onMounted(async () => {
     }
 });
 
-watch(() => match.value.id, (newId) => {
+watch(() => match.value?.id, (newId) => {
     if (newId) {
         setupRealTimeListeners();
     }
@@ -447,7 +519,7 @@ onUnmounted(() => {
 });
 
 // Watch for match status changes
-watch(() => match.value.status, (newStatus) => {
+watch(() => match.value?.status, (newStatus) => {
     if (newStatus === 'live') {
         activeTab.value = 'Live';
     }

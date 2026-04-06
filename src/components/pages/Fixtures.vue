@@ -644,7 +644,7 @@ const displayedCompletedMatches = computed(() => {
 // Methods
 // Tab Methods
 const setActiveTab = (tabId) => {
-    if (tabId === 'completed' && completedMatches.length === 0) return;
+    if (tabId === 'completed' && (completedMatches.value || []).length === 0) return;
     activeTab.value = tabId;
 };
 
