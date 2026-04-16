@@ -1,71 +1,103 @@
 <template>
-    <section id="home" class="bg-home bg-cover bg-center" :style="{ backgroundImage: `url(${bgHome})` }">
-        <div class="flex items-center justify-center py-24" style="padding-top: 7rem;">
-            <div class="container mx-auto px-4">
-                <div class="flex flex-wrap -mx-4">
-                    <div class="w-full lg:w-12/12 px-4">
+    <!-- Hero -->
+    <section class="relative overflow-hidden" style="background-color: #0f172a; min-height: 220px;">
+        <div class="absolute inset-0 bg-cover bg-center opacity-10 pointer-events-none"
+            :style="{ backgroundImage: `url(${bgHome})` }"></div>
 
-                        <h5 class="mb-6 text-white text-2xl font-bold flex items-center gap-2">
-                            <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9.75 6.75v10.5M14.25 6.75v10.5M4.5 8.25H19.5M6.75 4.5h10.5A2.25 2.25 0 0119.5 6.75v10.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 17.25V6.75A2.25 2.25 0 016.75 4.5z" />
-                            </svg>
-                            Currently Running
-                        </h5>
+        <div class="relative z-10 container mx-auto px-4 py-10" style="padding-top: 6rem;">
+            <h1 class="text-2xl font-bold text-white mb-1">Tournaments</h1>
+            <p class="text-slate-400 text-sm m-0">All cricket tournaments organised by MadCricketers</p>
+        </div>
+    </section>
 
-                        <!-- Loader -->
-                        <div v-if="loading" class="flex justify-center py-16">
-                            <svg class="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                    stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                            </svg>
-                        </div>
+    <!-- Filter + List -->
+    <section class="bg-slate-50 min-h-screen py-8">
+        <div class="container mx-auto px-4 max-w-3xl">
 
-                        <!-- Error -->
-                        <div v-else-if="error" class="text-center text-red-400 py-6">
-                            Failed to load tournaments. Please try again later.
-                        </div>
+            <!-- Status filter tabs -->
+            <div class="flex gap-2 mb-6 flex-wrap">
+                <button v-for="f in filters" :key="f.value" @click="activeFilter = f.value"
+                    :class="['px-4 py-1.5 text-xs font-semibold rounded-full border transition',
+                        activeFilter === f.value
+                            ? 'bg-red-600 text-white border-red-600'
+                            : 'bg-white text-slate-600 border-slate-200 hover:border-red-300']">
+                    {{ f.label }}
+                    <span v-if="f.value !== 'all'" class="ml-1 opacity-70">
+                        ({{ countByStatus(f.value) }})
+                    </span>
+                </button>
+            </div>
 
-                        <!-- Empty State -->
-                        <div v-else-if="tournaments.length === 0" class="text-center text-gray-300 py-10">
-                            No tournaments available.
-                        </div>
-
-                        <!-- Tournament Cards -->
-                        <div v-else class="grid gap-5 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-1">
-                            <TournamentCard v-for="tournament in tournaments" :key="tournament.id"
-                                :tournament="tournament" />
-                        </div>
-
+            <!-- Loading skeletons -->
+            <div v-if="loading" class="space-y-2">
+                <div v-for="i in 5" :key="i"
+                    class="bg-white rounded-xl border border-slate-100 p-3 animate-pulse flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-full bg-slate-200 flex-shrink-0"></div>
+                    <div class="flex-1 space-y-2">
+                        <div class="h-3.5 bg-slate-200 rounded w-2/3"></div>
+                        <div class="h-3 bg-slate-200 rounded w-1/3"></div>
                     </div>
+                    <div class="w-16 h-5 bg-slate-200 rounded-full"></div>
                 </div>
             </div>
+
+            <!-- Error -->
+            <div v-else-if="error"
+                class="bg-white rounded-xl border border-red-100 p-8 text-center text-red-500 text-sm">
+                Failed to load tournaments. Please try again later.
+            </div>
+
+            <!-- Empty (filtered) -->
+            <div v-else-if="filtered.length === 0"
+                class="bg-white rounded-xl border border-slate-100 p-10 text-center text-slate-400 text-sm">
+                No {{ activeFilter === 'all' ? '' : activeFilter }} tournaments found.
+            </div>
+
+            <!-- Tournament cards -->
+            <div v-else class="space-y-2">
+                <TournamentCard v-for="t in filtered" :key="t.id" :tournament="t" />
+            </div>
+
         </div>
     </section>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import TournamentCard from '../includes/TournamentCard.vue';
-import bgHome from './../../assets/bg/bg-home.png';
-import { fetchTournaments } from './../api/tournaments';
+import { ref, computed, onMounted } from 'vue'
+import TournamentCard from '../includes/TournamentCard.vue'
+import bgHome from './../../assets/bg/bg-home.png'
+import { fetchTournaments } from './../api/tournaments'
 
-const tournaments = ref([]);
-const loading = ref(true);
-const error = ref(false);
+const tournaments   = ref([])
+const loading       = ref(true)
+const error         = ref(false)
+const activeFilter  = ref('all')
+
+const filters = [
+    { value: 'all',       label: 'All' },
+    { value: 'live',      label: 'Live' },
+    { value: 'upcoming',  label: 'Upcoming' },
+    { value: 'completed', label: 'Completed' },
+]
+
+const countByStatus = (status) =>
+    tournaments.value.filter(t => t.status === status || (status === 'live' && t.status === 'ongoing')).length
+
+const filtered = computed(() => {
+    if (activeFilter.value === 'all') return tournaments.value
+    return tournaments.value.filter(t =>
+        t.status === activeFilter.value ||
+        (activeFilter.value === 'live' && t.status === 'ongoing')
+    )
+})
 
 onMounted(async () => {
     try {
-        loading.value = true;
-        tournaments.value = await fetchTournaments();
-    } catch (err) {
-        error.value = true;
-        console.error('Error fetching tournaments:', err);
+        tournaments.value = await fetchTournaments() || []
+    } catch {
+        error.value = true
     } finally {
-        loading.value = false;
+        loading.value = false
     }
-});
+})
 </script>

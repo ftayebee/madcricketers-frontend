@@ -1,138 +1,138 @@
 <template>
-    <nav :class="['fixed top-0 left-0 w-full z-50 transition-shadow bg-white', { 'shadow-md': isSticky }]">
-        <div class="container mx-auto items-center justify-between py-3 px-4 md:px-0" style="display: flex;">
-            <!-- Logo -->
-            <a href="/" class="flex items-center">
-                <img :src="mainLogo" alt="Logo" class="h-12" />
-            </a>
+    <nav :class="['fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-white',
+        isSticky ? 'shadow-md' : 'shadow-sm border-b border-slate-100']">
+        <div class="w-full px-4 lg:px-8 flex items-center justify-between py-3">
 
-            <!-- Desktop Menu -->
-            <ul class="hidden md:flex space-x-6 font-medium text-gray-700 mb-0">
-                <li><router-link to="/" class="nav-link" active-class="text-blue-700">Home</router-link></li>
-                <li><router-link to="/tournaments" class="hover:text-blue-600 nav-link"
-                        active-class="text-blue-700">Tournaments</router-link></li>
-                <li><router-link to="/players" class="hover:text-blue-600 nav-link"
-                        active-class="text-blue-700">Players</router-link></li>
-                <li><router-link to="/fixtures" class="hover:text-blue-600 nav-link"
-                        active-class="text-blue-700">Fixtures</router-link></li>
-                <li>
-                    <router-link to="/contact" class="hover:text-blue-600 nav-link"
-                        active-class="text-blue-700">Contact</router-link>
+            <!-- Logo -->
+            <router-link to="/" class="flex items-center flex-shrink-0">
+                <img :src="mainLogo" alt="MadCricketers" class="h-10" />
+            </router-link>
+
+            <!-- Desktop Menu (center) -->
+            <ul class="hidden lg:flex items-center gap-5 list-none m-0 p-0">
+                <li v-for="link in navLinks" :key="link.path">
+                    <router-link :to="link.path"
+                        class="text-sm font-medium text-slate-600 hover:text-red-600 transition-colors nav-link whitespace-nowrap"
+                        active-class="text-red-600 font-semibold">
+                        {{ link.label }}
+                    </router-link>
                 </li>
             </ul>
 
-            <div>
-                <router-link to="/registration" class="btn btn-sm btn-theme" type="button">Registration</router-link>
-                <a href="https://app.madcricketers.com/" class="btn btn-sm btn-theme-outline ml-3" target="_blank">Login</a>
+            <!-- Desktop CTA buttons (right) -->
+            <div class="hidden lg:flex items-center gap-2 flex-shrink-0">
+                <router-link to="/registration"
+                    class="btn-cta-primary text-sm px-4 py-1.5 rounded-lg font-semibold transition-all whitespace-nowrap">
+                    Registration
+                </router-link>
+                <a href="https://app.madcricketers.com/" target="_blank"
+                    class="btn-cta-outline text-sm px-4 py-1.5 rounded-lg font-semibold transition-all whitespace-nowrap">
+                    Login
+                </a>
             </div>
 
-            <!-- Mobile Hamburger Button -->
-            <button @click="toggleMenu" class="md:hidden focus:outline-none" aria-label="Toggle Menu">
-                <svg v-if="!isMenuOpen" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 8h16M4 16h16" />
+            <!-- Mobile: right side = hamburger only -->
+            <button @click="toggleMenu"
+                class="lg:hidden flex items-center justify-center w-9 h-9 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors focus:outline-none"
+                aria-label="Toggle Menu">
+                <svg v-if="!isMenuOpen" class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                <svg v-else class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
         </div>
 
         <!-- Mobile Menu -->
-        <transition name="slide-fade">
-            <div v-if="isMenuOpen" class="md:hidden bg-white shadow-md">
-                <ul class="flex flex-col space-y-2 px-4 py-4 text-gray-700 font-medium">
-                    <li><router-link @click.native="closeMenu" to="/">Home</router-link></li>
-                    <li><router-link @click.native="closeMenu" to="/features">Features</router-link></li>
-                    <li><router-link @click.native="closeMenu" to="/services">Services</router-link></li>
-                    <li><router-link @click.native="closeMenu" to="/reviews">Reviews</router-link></li>
-                    <li><router-link @click.native="closeMenu" to="/team">Team</router-link></li>
-                    <li><router-link @click.native="closeMenu" to="/pricing">Pricing</router-link></li>
-                    <li><router-link @click.native="closeMenu" to="/contact">Contact</router-link></li>
-                    <li>
-                        <button @click="closeMenu"
-                            class="w-full mt-2 bg-blue-600 text-white py-2 rounded hover:bg-blue-700" type="button">
-                            Create Account
-                        </button>
+        <transition name="slide-down">
+            <div v-if="isMenuOpen" class="lg:hidden bg-white border-t border-slate-100 shadow-lg">
+                <ul class="list-none m-0 p-0 px-4 py-3 space-y-1">
+                    <li v-for="link in navLinks" :key="link.path">
+                        <router-link :to="link.path" @click="closeMenu"
+                            class="block py-2.5 px-3 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-red-600 transition-colors no-underline"
+                            active-class="bg-red-50 text-red-600">
+                            {{ link.label }}
+                        </router-link>
                     </li>
                 </ul>
+                <div class="px-4 pb-4 flex flex-col gap-2">
+                    <router-link to="/registration" @click="closeMenu"
+                        class="btn-cta-primary text-sm text-center py-2.5 rounded-lg font-semibold transition-all">
+                        Registration
+                    </router-link>
+                    <a href="https://app.madcricketers.com/" target="_blank"
+                        class="btn-cta-outline text-sm text-center py-2.5 rounded-lg font-semibold transition-all">
+                        Admin Login
+                    </a>
+                </div>
             </div>
         </transition>
     </nav>
 </template>
 
 <script setup>
-    import {
-        ref,
-        onMounted,
-        onUnmounted
-    } from 'vue'
-    import mainLogo from '../../assets/main-logo-dark.png'
+import { ref, onMounted, onUnmounted } from 'vue'
+import mainLogo from '../../assets/main-logo-dark.png'
 
-    const isMenuOpen = ref(false)
-    const isSticky = ref(false)
+const isMenuOpen = ref(false)
+const isSticky = ref(false)
 
-    function toggleMenu() {
-        isMenuOpen.value = !isMenuOpen.value
-    }
+const navLinks = [
+    { path: '/', label: 'Home' },
+    { path: '/tournaments', label: 'Tournaments' },
+    { path: '/fixtures', label: 'Fixtures' },
+    { path: '/players', label: 'Players' },
+    { path: '/contact-us', label: 'Contact' },
+]
 
-    function closeMenu() {
-        isMenuOpen.value = false
-    }
+const toggleMenu = () => { isMenuOpen.value = !isMenuOpen.value }
+const closeMenu = () => { isMenuOpen.value = false }
 
-    // Sticky nav on scroll
-    function handleScroll() {
-        isSticky.value = window.scrollY > 50
-    }
+const handleScroll = () => { isSticky.value = window.scrollY > 40 }
 
-    onMounted(() => {
-        window.addEventListener('scroll', handleScroll)
-    })
-    onUnmounted(() => {
-        window.removeEventListener('scroll', handleScroll)
-    })
+onMounted(() => window.addEventListener('scroll', handleScroll))
+onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 </script>
 
 <style scoped>
-    /* Slide fade transition for mobile menu */
-    .slide-fade-enter-active,
-    .slide-fade-leave-active {
-        transition: all 0.3s ease;
-    }
+.btn-cta-primary {
+    background-color: #D84040;
+    color: #fff;
+    border: 1.5px solid #D84040;
+    display: inline-block;
+    text-decoration: none;
+}
 
-    .slide-fade-enter-from,
-    .slide-fade-leave-to {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
+.btn-cta-primary:hover {
+    background-color: #c03030;
+    border-color: #c03030;
+    color: #fff;
+}
 
-    /* Primary themed button */
-    .btn-theme {
-        background-color: #D84040; /* soft red */
-        color: #fff;
-        border: 1px solid #D84040;
-        transition: all 0.3s ease;
-    }
+.btn-cta-outline {
+    background-color: transparent;
+    color: #D84040;
+    border: 1.5px solid #D84040;
+    display: inline-block;
+    text-decoration: none;
+}
 
-    .btn-theme:hover {
-        background-color: #FF5A5A; /* slightly lighter red on hover */
-        border-color: #FF5A5A;
-        color: #fff;
-    }
+.btn-cta-outline:hover {
+    background-color: #D84040;
+    color: #fff;
+}
 
-    /* Outline themed button (for login) */
-    .btn-theme-outline {
-        background-color: transparent;
-        color: #D84040;
-        border: 1px solid #D84040;
-        transition: all 0.3s ease;
-    }
+/* Slide down animation for mobile menu */
+.slide-down-enter-active,
+.slide-down-leave-active {
+    transition: all 0.25s ease;
+}
 
-    .btn-theme-outline:hover {
-        background-color: #D84040;
-        color: #fff;
-        border-color: #D84040;
-    }
-
+.slide-down-enter-from,
+.slide-down-leave-to {
+    opacity: 0;
+    transform: translateY(-8px);
+}
 </style>

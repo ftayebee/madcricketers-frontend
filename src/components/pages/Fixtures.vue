@@ -1,6 +1,8 @@
 <template>
-    <section id="home" class="bg-home bg-cover bg-center bg-overlay" :style="{ backgroundImage: `url(${bgHome})` }">
-        <div class="flex items-center justify-center py-24 pb-5" style="padding-top: 7rem;">
+    <section id="home" class="relative overflow-hidden" style="background-color: #0f172a; min-height: 280px;">
+        <div class="absolute inset-0 bg-cover bg-center opacity-10 pointer-events-none"
+            :style="{ backgroundImage: `url(${bgHome})` }"></div>
+        <div class="relative z-10 flex items-start pt-24 pb-5">
             <div class="container mx-auto px-4">
                 <div class="mb-12">
                     <div class="flex flex-wrap -mx-4 items-center justify-between mb-6">
@@ -88,21 +90,16 @@
                                                                 getTeamAbbreviation(match.team_a?.name) }}</span>
                                                         </div>
                                                         <div>
-                                                            <div class="font-bold text-white">{{ match.team_a?.name }}
+                                                            <div class="font-bold text-white">{{ match.team_a?.name }}</div>
+                                                            <div v-if="match.team_a?.score" class="text-sm text-gray-300">
+                                                                {{ match.team_a.score }}
+                                                                <span v-if="match.team_a?.overs">({{ Number(match.team_a.overs).toFixed(1) }})</span>
                                                             </div>
-                                                            <div v-if="match.innings && match.innings[0]"
-                                                                class="text-sm text-gray-300">
-                                                                {{ match.innings[0].runs || 0 }}/{{
-                                                                    match.innings[0].wickets || 0 }}
-                                                                ({{ match.innings[0].overs || 0.0 }})
-                                                            </div>
+                                                            <div v-else class="text-sm text-gray-400">Yet to bat</div>
                                                         </div>
                                                     </div>
                                                     <div class="text-right">
-                                                        <div class="text-2xl font-bold text-white">{{ match.team_a_score
-                                                            || 0 }}</div>
-                                                        <div class="text-xs text-gray-300">CRR: {{
-                                                            match.current_run_rate || 0.0 }}</div>
+                                                        <div class="text-xl font-bold text-white">{{ match.team_a?.score || '—' }}</div>
                                                     </div>
                                                 </div>
 
@@ -122,21 +119,16 @@
                                                                 getTeamAbbreviation(match.team_b?.name) }}</span>
                                                         </div>
                                                         <div>
-                                                            <div class="font-bold text-white">{{ match.team_b?.name }}
+                                                            <div class="font-bold text-white">{{ match.team_b?.name }}</div>
+                                                            <div v-if="match.team_b?.score" class="text-sm text-gray-300">
+                                                                {{ match.team_b.score }}
+                                                                <span v-if="match.team_b?.overs">({{ Number(match.team_b.overs).toFixed(1) }})</span>
                                                             </div>
-                                                            <div v-if="match.innings && match.innings[1]"
-                                                                class="text-sm text-gray-300">
-                                                                {{ match.innings[1].runs || 0 }}/{{
-                                                                    match.innings[1].wickets || 0 }}
-                                                                ({{ match.innings[1].overs || 0.0 }})
-                                                            </div>
+                                                            <div v-else class="text-sm text-gray-400">Yet to bat</div>
                                                         </div>
                                                     </div>
                                                     <div class="text-right">
-                                                        <div class="text-2xl font-bold text-white">{{ match.team_b_score
-                                                            || 0 }}</div>
-                                                        <div class="text-xs text-gray-300">Req: {{
-                                                            match.required_run_rate || 0.0 }}</div>
+                                                        <div class="text-xl font-bold text-white">{{ match.team_b?.score || '—' }}</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -185,35 +177,25 @@
         </div>
     </section>
 
-    <section class="bg-cover bg-center">
-        <div class="flex items-center justify-center py-24 pb-5">
-            <div class="container mx-auto px-4">
+    <section class="bg-slate-50 min-h-screen py-8">
+        <div class="container mx-auto px-4 max-w-4xl">
                 <!-- Tabs Navigation -->
-                <div class="mb-8">
-                    <div class="border-b border-gray-200">
-                        <nav class="flex space-x-8">
-                            <button v-for="tab in tabs" :key="tab.id" @click="setActiveTab(tab.id)"
-                                :disabled="tab.id === 'completed' && completedMatches.length === 0" :class="[
-                                    'py-3 px-1 font-medium text-sm border-b-2 transition-all duration-200',
-                                    activeTab === tab.id
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                                    tab.id === 'completed' && completedMatches.length === 0 ? 'opacity-50 cursor-not-allowed' : ''
-                                ]">
-                                <div class="flex items-center gap-2">
-                                    <span>{{ tab.label }}</span>
-                                    <span v-if="tab.id === 'upcoming' && upcomingMatches.length > 0"
-                                        class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">
-                                        {{ upcomingMatches.length }}
-                                    </span>
-                                    <span v-if="tab.id === 'completed' && completedMatches.length > 0"
-                                        class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">
-                                        {{ completedMatches.length }}
-                                    </span>
-                                </div>
-                            </button>
-                        </nav>
-                    </div>
+                <div class="flex gap-2 mb-6 flex-wrap">
+                    <button v-for="tab in tabs" :key="tab.id" @click="setActiveTab(tab.id)"
+                        :disabled="tab.id === 'completed' && completedMatches.length === 0"
+                        :class="['px-4 py-1.5 text-xs font-semibold rounded-full border transition',
+                            activeTab === tab.id
+                                ? 'bg-red-600 text-white border-red-600'
+                                : 'bg-white text-slate-600 border-slate-200 hover:border-red-300',
+                            tab.id === 'completed' && completedMatches.length === 0 ? 'opacity-50 cursor-not-allowed' : '']">
+                        {{ tab.label }}
+                        <span v-if="tab.id === 'upcoming' && upcomingMatches.length > 0" class="ml-1 opacity-70">
+                            ({{ upcomingMatches.length }})
+                        </span>
+                        <span v-if="tab.id === 'completed' && completedMatches.length > 0" class="ml-1 opacity-70">
+                            ({{ completedMatches.length }})
+                        </span>
+                    </button>
                 </div>
 
                 <!-- Tab Content -->
@@ -462,7 +444,6 @@
                     <h3 class="text-xl font-semibold text-gray-700 mb-2">No Matches Scheduled</h3>
                     <p class="text-gray-500">There are no matches scheduled at the moment. Check back later!</p>
                 </div>
-            </div>
         </div>
     </section>
 </template>
@@ -473,10 +454,9 @@ import MatchRow from './../includes/MatchRow.vue';
 import { fetchCompletedMatches, fetchLiveMatches, fetchUpcomingMatches } from '../api/matches';
 import { useRouter } from 'vue-router';
 import { getTeamAbbreviation } from './../../helpers/MatchHelper'
+import bgHome from './../../assets/bg/bg-home.png';
 
 const router = useRouter();
-
-const bgHome = ref('https://images.unsplash.com/photo-1531415074968-036ba1b575da?ixlib=rb-1.2.1&auto=format&fit=crop&w=2000&q=80');
 
 // States
 const loading = ref(false);

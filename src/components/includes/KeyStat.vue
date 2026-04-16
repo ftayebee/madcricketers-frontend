@@ -1,39 +1,43 @@
 <template>
-    <div class="bg-white rounded-md shadow-md mt-0">
-        <div class="text-md font-semibold text-gray-800 mb-0 px-3 py-2 bg-gray-200 rounded-md rounded-b-none">
-            <span>{{ title }}</span> <!-- Dynamic title -->
+    <div class="bg-white rounded-xl border border-slate-100 overflow-hidden">
+        <!-- Label bar -->
+        <div class="px-4 py-2 bg-slate-800 flex items-center justify-between">
+            <span class="text-xs font-bold text-white uppercase tracking-wide">{{ title }}</span>
         </div>
-        <div class="p-4">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <!-- Player Info -->
-                    <img :src="stat.player.image || 'https://via.placeholder.com/56'" alt="Player Image"
-                        class="w-14 h-14 rounded-full object-cover" />
-                    <div>
-                        <p class="text-sm font-bold m-0">{{ stat.player.name }}</p> <!-- Player Name -->
-                        <p class="text-xs text-gray-500">{{ stat.player.team }}</p> <!-- Team Name -->
+        <!-- Content -->
+        <div class="px-4 py-3 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+                <!-- Player photo -->
+                <div class="w-11 h-11 rounded-full overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0">
+                    <img v-if="stat.player?.image" :src="stat.player.image"
+                        @error="hideImg($event)" class="w-full h-full object-cover" />
+                    <div v-else
+                        class="w-full h-full flex items-center justify-center text-slate-400 font-bold text-sm">
+                        {{ abbr(stat.player?.name) }}
                     </div>
                 </div>
-                <!-- Stat Value -->
-                <div class="flex items-center gap-2">
-                    <h4 class="text-lg font-bold text-blue-600">{{ stat.value }}</h4>
+                <!-- Name + team -->
+                <div class="min-w-0">
+                    <p class="text-sm font-bold text-slate-900 m-0 truncate">{{ stat.player?.name }}</p>
+                    <p class="text-xs text-slate-400 m-0 truncate">{{ stat.player?.team }}</p>
                 </div>
+            </div>
+            <!-- Value -->
+            <div class="flex-shrink-0 text-right">
+                <span class="text-xl font-extrabold text-red-600">{{ stat.value }}</span>
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
-const props = defineProps({
-    stat: {
-        type: Object,
-        required: true
-    },
-    title: {
-        type: String,
-        default: ''
-    }
+import { getTeamAbbreviation } from './../../helpers/MatchHelper'
+
+defineProps({
+    stat: { type: Object, required: true },
+    title: { type: String, default: '' }
 })
 
-console.log('KeyStat Component Loaded:', props.stat)
+const abbr = (name) => getTeamAbbreviation(name)
+const hideImg = (e) => { e.target.style.display = 'none' }
 </script>

@@ -1,64 +1,60 @@
 <template>
-    <div class="container mx-auto px-4 bg-white min-h-screen">
-        <div class="max-w-7xl mx-auto py-10 px-4 grid grid-cols-1 gap-8">
-            <!-- Main Content -->
-            <div class="lg:col-span-2 space-y-8">
-                <!-- Featured Matches -->
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Featured Matches</h3>
-                    <div class="">
-                        <MatchRow v-for="match in tournament.matches" :key="match.id" :match="match" />
+    <div class="bg-slate-50 min-h-screen py-8">
+        <div class="container mx-auto px-4 max-w-4xl">
+
+            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2 mb-5">
+                <span class="w-1 h-5 rounded bg-red-500 inline-block"></span>
+                All Matches
+            </h3>
+
+            <!-- Empty state -->
+            <div v-if="!tournament.matches || tournament.matches.length === 0"
+                class="bg-white rounded-xl border border-slate-100 p-10 text-center text-slate-400 text-sm">
+                No matches scheduled for this tournament yet.
+            </div>
+
+            <!-- Grouped by stage -->
+            <template v-else>
+                <div v-for="(matches, stage) in groupedByStage" :key="stage" class="mb-8">
+                    <div v-if="stage && stage !== 'undefined'"
+                        class="flex items-center gap-3 mb-3">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">{{ stage }}</span>
+                        <div class="flex-1 h-px bg-slate-200"></div>
+                        <span class="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                            {{ matches.length }} matches
+                        </span>
+                    </div>
+                    <div class="space-y-2">
+                        <MatchRow v-for="match in matches" :key="match.id" :match="match" />
                     </div>
                 </div>
-            </div>
+            </template>
+
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
 import MatchRow from './../MatchRow.vue'
 
 const props = defineProps({
     tournament: {
         type: Object,
         required: true
-    },
+    }
 })
 
-const pointGroups = ['Group A', 'Group B', 'Group C', 'Group D']
-const activeGroup = ref('Group A')
+// Group matches by their stage field
+const groupedByStage = computed(() => {
+    const matches = props.tournament?.matches || []
+    if (!matches.length) return {}
 
-const pointsTable = {
-    'Group A': [
-        { name: 'India U19', p: 3, w: 3, l: 0, nrr: '+3.240', pts: 6 },
-        { name: 'Bangladesh U19', p: 3, w: 2, l: 1, nrr: '-0.374', pts: 4 },
-        { name: 'Ireland U19', p: 3, w: 1, l: 2, nrr: '-0.778', pts: 2 },
-        { name: 'USA U19', p: 4, w: 0, l: 4, nrr: '-2.340', pts: 0 }
-    ],
-    // Add other groups similarly
-}
-
-const keyStats = [
-    {
-        label: 'Most Runs',
-        player: { name: 'U Saharan', image: '/players/usaharan.png' },
-        value: '397 Runs'
-    },
-    {
-        label: 'Most Wickets',
-        player: { name: 'K Maphaka', image: '/players/kmaphaka.png' },
-        value: '21 Wickets'
-    },
-    {
-        label: 'Most Sixes',
-        player: { name: 'S Stolk', image: '/players/stolk.png' },
-        value: '11 Sixes'
-    },
-    {
-        label: 'Best Strike Rate',
-        player: { name: 'S Stolk', image: '/players/stolk.png' },
-        value: '141.61'
-    }
-]
+    return matches.reduce((acc, match) => {
+        const stage = match.stage || 'General'
+        if (!acc[stage]) acc[stage] = []
+        acc[stage].push(match)
+        return acc
+    }, {})
+})
 </script>
