@@ -1,142 +1,191 @@
 <template>
-    <section id="home" class="bg-home" :style="{ backgroundImage: `url(${bgHome})` }">
-        <div class="flex items-center justify-center py-8" style="padding-top: 7rem;">
-            <div class="container mx-auto px-4 pt-12">
-                <div class="w-full text-center">
-                    <h2 class="mb-6 text-white text-3xl font-semibold">Player Registration</h2>
-                    <p class="text-white text-lg">Please fill in the form below to register as a player.</p>
-                </div>
+    <!-- Hero -->
+    <section class="relative overflow-hidden" style="background-color: #0f172a; min-height: 200px;">
+        <div class="absolute inset-0 opacity-10 pointer-events-none"
+            :style="{ backgroundImage: `url(${bgHome})`, backgroundSize: 'cover', backgroundPosition: 'center' }">
+        </div>
+        <div class="relative z-10 flex items-center pt-24 pb-8">
+            <div class="container mx-auto px-4">
+                <h1 class="text-white text-2xl font-bold m-0 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    Player Registration
+                </h1>
+                <p class="text-slate-400 text-sm mt-1 m-0">Fill in the form below to register as a MadCricketers
+                    player.</p>
             </div>
         </div>
     </section>
 
-    <section>
-        <div class="container mx-auto px-4 pb-20">
-            <div class="bg-white p-8 rounded shadow mx-auto mt-4">
-                <form @submit.prevent="submitForm" enctype="multipart/form-data">
-                    <!-- Personal Information -->
-                    <div>
-                        <label class="block font-medium mb-2">Profile Picture *</label>
-                        <div class="mb-4">
-                            <div v-if="!imageSrc"
-                                class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                                <input type="file" @change="uploadImage" accept="image/*" class="hidden"
-                                    ref="fileInput" />
-                                <button type="button" @click="triggerFileInput"
-                                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition mb-3">
-                                    Choose Image
-                                </button>
-                                <p class="text-gray-500">or drag and drop an image here</p>
-                                <p class="text-gray-400 text-sm mt-2">Maximum file size: 2MB</p>
-                            </div>
+    <!-- Form Body -->
+    <section class="bg-slate-50 py-8">
+        <div class="container mx-auto px-4 pb-10">
+            <form @submit.prevent="submitForm" enctype="multipart/form-data" class="flex flex-col gap-6">
 
-                            <div v-if="imageSrc">
-                                <!-- Vue Cropper Component -->
-                                <vue-cropper ref="cropperRef" :src="imageSrc" :aspect-ratio="1" :view-mode="2"
-                                    :background="false" :auto-crop-area="0.8" :drag-mode="'crop'" :guides="true"
-                                    :center="true" :highlight="true" :responsive="true" :restore="true"
-                                    :check-cross-origin="false" @ready="onReady" class="cropper-container" />
+                <!-- ── Section: Profile Picture ── -->
+                <div class="bg-white rounded-xl border border-slate-100 p-6">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2 mb-5">
+                        <span class="w-1 h-5 rounded bg-red-500 inline-block"></span>
+                        Profile Picture <span class="text-red-500 text-sm font-normal ml-1">*</span>
+                    </h2>
 
-                                <div class="flex flex-wrap gap-2 mb-4 mt-4">
-                                    <button type="button" @click="cropImage"
-                                        class="px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm">
-                                        Crop Image
-                                    </button>
-                                    <button type="button" @click="rotateLeft"
-                                        class="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">
-                                        ↺ Rotate Left
-                                    </button>
-                                    <button type="button" @click="rotateRight"
-                                        class="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">
-                                        ↻ Rotate Right
-                                    </button>
-                                    <button type="button" @click="resetCrop"
-                                        class="px-3 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm">
-                                        Reset Crop
-                                    </button>
-                                    <button type="button" @click="removeImage"
-                                        class="px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm">
-                                        Remove Image
-                                    </button>
-                                    <button type="button" @click="triggerFileInput"
-                                        class="px-3 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 text-sm">
-                                        Change Image
-                                    </button>
-                                </div>
-
-                                <!-- Preview -->
-                                <div v-if="croppedImageUrl" class="mt-4 p-4 bg-gray-50 rounded border">
-                                    <p class="text-sm font-medium text-gray-700 mb-2">Cropped Preview:</p>
-                                    <div class="flex flex-col md:flex-row items-start gap-4">
-                                        <img :src="croppedImageUrl" alt="Cropped Preview"
-                                            class="w-32 h-32 object-cover rounded border" />
-                                        <div>
-                                            <p class="text-sm text-green-600 font-medium">
-                                                ✓ Image cropped and ready for upload
-                                            </p>
-                                            <p class="text-xs text-gray-500 mt-1">
-                                                Size: {{ formatFileSize(croppedBlob?.size || 0) }}
-                                            </p>
-                                            <p class="text-xs text-gray-500">
-                                                Dimensions: 300 × 300 pixels
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    <!-- Upload area (no image yet) -->
+                    <div v-if="!imageSrc"
+                        class="border-2 border-dashed border-slate-200 hover:border-red-300 rounded-xl p-10 text-center transition-colors cursor-pointer"
+                        @click="triggerFileInput">
+                        <input type="file" @change="uploadImage" accept="image/*" class="hidden" ref="fileInput" />
+                        <div class="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                            </svg>
                         </div>
-                        <span v-if="errors.image" class="text-red-500 text-sm mt-1">{{ errors.image[0] }}</span>
-                        <p class="text-gray-500 text-xs mt-1">Recommended: Square image, max 2MB (JPEG, PNG, WebP)</p>
+                        <p class="text-sm font-semibold text-slate-700 m-0">Click to choose an image</p>
+                        <p class="text-xs text-slate-400 mt-1 m-0">JPEG, PNG or WebP · Max 12 MB</p>
                     </div>
 
-                    <!-- Rest of your form fields -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block font-medium mb-1">Full Name *</label>
-                            <input v-model="form.full_name" type="text"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
-                                required />
-                            <span v-if="errors.full_name" class="text-red-500 text-sm mt-1">{{ errors.full_name[0]
-                            }}</span>
+                    <!-- Cropper area -->
+                    <div v-if="imageSrc">
+                        <input type="file" @change="uploadImage" accept="image/*" class="hidden" ref="fileInput" />
+
+                        <vue-cropper ref="cropperRef" :src="imageSrc" :aspect-ratio="1" :view-mode="2"
+                            :background="false" :auto-crop-area="0.8" :drag-mode="'crop'" :guides="true" :center="true"
+                            :highlight="true" :responsive="true" :restore="true" :check-cross-origin="false"
+                            @ready="onReady" class="cropper-container" />
+
+                        <!-- Cropper action buttons -->
+                        <div class="flex flex-wrap gap-2 mt-4">
+                            <button type="button" @click="cropImage"
+                                class="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Crop Image
+                            </button>
+                            <button type="button" @click="rotateLeft"
+                                class="px-3 py-2 bg-slate-600 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg transition-colors">
+                                ↺ Rotate Left
+                            </button>
+                            <button type="button" @click="rotateRight"
+                                class="px-3 py-2 bg-slate-600 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg transition-colors">
+                                ↻ Rotate Right
+                            </button>
+                            <button type="button" @click="resetCrop"
+                                class="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded-lg transition-colors">
+                                Reset Crop
+                            </button>
+                            <button type="button" @click="triggerFileInput"
+                                class="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-lg transition-colors">
+                                Change Image
+                            </button>
+                            <button type="button" @click="removeImage"
+                                class="px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded-lg transition-colors">
+                                Remove
+                            </button>
                         </div>
 
+                        <!-- Crop preview -->
+                        <div v-if="croppedImageUrl"
+                            class="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-4">
+                            <img :src="croppedImageUrl" alt="Cropped Preview"
+                                class="w-20 h-20 object-cover rounded-full border-2 border-emerald-300 flex-shrink-0" />
+                            <div>
+                                <p class="text-sm font-semibold text-emerald-700 m-0">
+                                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor"
+                                        stroke-width="2.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Image ready for upload
+                                </p>
+                                <p class="text-xs text-emerald-600 m-0 mt-0.5">
+                                    {{ formatFileSize(croppedBlob?.size || 0) }} · 300 × 300 px
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <span v-if="errors.image" class="text-red-500 text-xs mt-2 block">{{ errors.image[0] }}</span>
+                    <p class="text-slate-400 text-xs mt-2 m-0">Square image recommended. Will be cropped to 300×300
+                        px.</p>
+                </div>
+
+                <!-- ── Section: Personal Information ── -->
+                <div class="bg-white rounded-xl border border-slate-100 p-6">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2 mb-5">
+                        <span class="w-1 h-5 rounded bg-red-500 inline-block"></span>
+                        Personal Information
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                        <!-- Full Name -->
                         <div>
-                            <label class="block font-medium mb-1">Nickname</label>
-                            <input v-model="form.nickname" type="text"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300" />
-                            <span v-if="errors.nickname" class="text-red-500 text-sm mt-1">{{ errors.nickname[0]
-                            }}</span>
+                            <label class="field-label">Full Name <span class="text-red-500">*</span></label>
+                            <input v-model="form.full_name" type="text" required placeholder="e.g. Al-Amin Hossain"
+                                :class="fieldClass(errors.full_name)" />
+                            <span v-if="errors.full_name" class="field-error">{{ errors.full_name[0] }}</span>
                         </div>
 
+                        <!-- Nickname -->
                         <div>
-                            <label class="block font-medium mb-1">Email *</label>
-                            <input v-model="form.email" type="email"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
-                                required />
-                            <span v-if="errors.email" class="text-red-500 text-sm mt-1">{{ errors.email[0] }}</span>
+                            <label class="field-label">Nickname <span class="optional">(optional)</span></label>
+                            <input v-model="form.nickname" type="text" placeholder="e.g. Rony"
+                                :class="fieldClass(errors.nickname)" />
+                            <span v-if="errors.nickname" class="field-error">{{ errors.nickname[0] }}</span>
                         </div>
 
+                        <!-- Email -->
                         <div>
-                            <label class="block font-medium mb-1">Password *</label>
-                            <input v-model="form.password" type="password"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
-                                required />
-                            <span v-if="errors.password" class="text-red-500 text-sm mt-1">{{ errors.password[0]
-                            }}</span>
+                            <label class="field-label">Email <span class="text-red-500">*</span></label>
+                            <input v-model="form.email" type="email" required placeholder="your@email.com"
+                                :class="fieldClass(errors.email)" />
+                            <span v-if="errors.email" class="field-error">{{ errors.email[0] }}</span>
                         </div>
 
+                        <!-- Password -->
                         <div>
-                            <label class="block font-medium mb-1">Phone *</label>
-                            <input v-model="form.phone" type="tel"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
-                                required />
-                            <span v-if="errors.phone" class="text-red-500 text-sm mt-1">{{ errors.phone[0] }}</span>
+                            <label class="field-label">Password <span class="text-red-500">*</span></label>
+                            <input v-model="form.password" type="password" required placeholder="Choose a password"
+                                :class="fieldClass(errors.password)" />
+                            <span v-if="errors.password" class="field-error">{{ errors.password[0] }}</span>
                         </div>
 
+                        <!-- Phone -->
                         <div>
-                            <label class="block font-medium mb-1">Blood Group</label>
-                            <select v-model="form.blood_group"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300">
+                            <label class="field-label">Phone <span class="text-red-500">*</span></label>
+                            <input v-model="form.phone" type="tel" required placeholder="+880 1700-000000"
+                                :class="fieldClass(errors.phone)" />
+                            <span v-if="errors.phone" class="field-error">{{ errors.phone[0] }}</span>
+                        </div>
+
+                        <!-- Gender -->
+                        <div>
+                            <label class="field-label">Gender <span class="optional">(optional)</span></label>
+                            <select v-model="form.gender" :class="fieldClass(errors.gender)">
+                                <option value="">Select</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <span v-if="errors.gender" class="field-error">{{ errors.gender[0] }}</span>
+                        </div>
+
+                        <!-- Date of Birth -->
+                        <div>
+                            <label class="field-label">Date of Birth <span class="optional">(optional)</span></label>
+                            <flat-pickr v-model="form.date_of_birth" :config="flatpickrConfig"
+                                :class="fieldClass(errors.date_of_birth)" placeholder="Select date" />
+                            <span v-if="errors.date_of_birth" class="field-error">{{ errors.date_of_birth[0] }}</span>
+                        </div>
+
+                        <!-- Blood Group -->
+                        <div>
+                            <label class="field-label">Blood Group <span class="optional">(optional)</span></label>
+                            <select v-model="form.blood_group" :class="fieldClass(errors.blood_group)">
                                 <option value="">Select Blood Group</option>
                                 <option value="A+">A+</option>
                                 <option value="A-">A-</option>
@@ -147,35 +196,13 @@
                                 <option value="O+">O+</option>
                                 <option value="O-">O-</option>
                             </select>
-                            <span v-if="errors.blood_group" class="text-red-500 text-sm mt-1">{{ errors.blood_group[0]
-                            }}</span>
+                            <span v-if="errors.blood_group" class="field-error">{{ errors.blood_group[0] }}</span>
                         </div>
 
+                        <!-- Religion -->
                         <div>
-                            <label class="block font-medium mb-1">Gender</label>
-                            <select v-model="form.gender"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300">
-                                <option value="">Select</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                                <option value="other">Other</option>
-                            </select>
-                            <span v-if="errors.gender" class="text-red-500 text-sm mt-1">{{ errors.gender[0] }}</span>
-                        </div>
-
-                        <div>
-                            <label class="block font-medium mb-1">Date of Birth</label>
-                            <flat-pickr v-model="form.date_of_birth" :config="flatpickrConfig"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300">
-                            </flat-pickr>
-                            <span v-if="errors.date_of_birth" class="text-red-500 text-sm mt-1">{{
-                                errors.date_of_birth[0] }}</span>
-                        </div>
-
-                        <div>
-                            <label class="block font-medium mb-1">Religion</label>
-                            <select v-model="form.religion"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300">
+                            <label class="field-label">Religion <span class="optional">(optional)</span></label>
+                            <select v-model="form.religion" :class="fieldClass(errors.religion)">
                                 <option value="">Select Religion</option>
                                 <option value="islam">Islam</option>
                                 <option value="hinduism">Hinduism</option>
@@ -183,206 +210,250 @@
                                 <option value="buddhism">Buddhism</option>
                                 <option value="other">Other</option>
                             </select>
-                            <span v-if="errors.religion" class="text-red-500 text-sm mt-1">{{ errors.religion[0]
-                            }}</span>
+                            <span v-if="errors.religion" class="field-error">{{ errors.religion[0] }}</span>
                         </div>
 
+                        <!-- Married Status -->
                         <div>
-                            <label class="block font-medium mb-1">National ID</label>
-                            <input v-model="form.national_id" type="text"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300" />
-                            <span v-if="errors.national_id" class="text-red-500 text-sm mt-1">{{ errors.national_id[0]
-                            }}</span>
-                        </div>
-
-                        <div>
-                            <label class="block font-medium mb-1">Favourite Football Country</label>
-                            <input v-model="form.favourite_football_country" type="text"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300" />
-                            <span v-if="errors.favourite_football_country" class="text-red-500 text-sm mt-1">{{ errors.favourite_football_country[0] }}</span>
-                        </div>
-
-                        <div>
-                            <label class="block font-medium mb-1">Favourite Cricket Country</label>
-                            <input v-model="form.favourite_cricket_country" type="text"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300" />
-                            <span v-if="errors.favourite_cricket_country" class="text-red-500 text-sm mt-1">{{ errors.favourite_cricket_country[0] }}</span>
-                        </div>
-
-                        <div>
-                            <label class="block font-medium mb-1">Favourite Football League Team</label>
-                            <input v-model="form.favourite_football_league_team" type="text"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300" />
-                            <span v-if="errors.favourite_football_league_team" class="text-red-500 text-sm mt-1">{{ errors.favourite_football_league_team[0] }}</span>
-                        </div>
-
-                        <div>
-                            <label class="block font-medium mb-1">Married Status</label>
-                            <select v-model="form.married_status"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300">
+                            <label class="field-label">Marital Status <span class="optional">(optional)</span></label>
+                            <select v-model="form.married_status" :class="fieldClass(errors.married_status)">
                                 <option value="">Select Status</option>
                                 <option value="single">Single</option>
                                 <option value="married">Married</option>
                                 <option value="divorced">Divorced</option>
                                 <option value="widowed">Widowed</option>
                             </select>
-                            <span v-if="errors.married_status" class="text-red-500 text-sm mt-1">{{ errors.married_status[0] }}</span>
+                            <span v-if="errors.married_status" class="field-error">{{ errors.married_status[0]
+                            }}</span>
                         </div>
 
+                        <!-- National ID -->
                         <div>
-                            <label class="block font-medium mb-1">Education Batch Filter</label>
-                            <input v-model="form.education_batch" type="text"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
-                                placeholder="e.g., 2018-2022" />
-                            <span v-if="errors.education_batch" class="text-red-500 text-sm mt-1">{{ errors.education_batch[0] }}</span>
+                            <label class="field-label">National ID <span class="optional">(optional)</span></label>
+                            <input v-model="form.national_id" type="text" placeholder="NID number"
+                                :class="fieldClass(errors.national_id)" />
+                            <span v-if="errors.national_id" class="field-error">{{ errors.national_id[0] }}</span>
                         </div>
 
-                        <div>
-                            <label class="block font-medium mb-1">SSC Batch Field</label>
-                            <input v-model="form.ssc_batch" type="text"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
-                                placeholder="e.g., 2018" />
-                            <span v-if="errors.ssc_batch" class="text-red-500 text-sm mt-1">{{ errors.ssc_batch[0] }}</span>
+                        <!-- Address (full width) -->
+                        <div class="sm:col-span-2">
+                            <label class="field-label">Address <span class="optional">(optional)</span></label>
+                            <input v-model="form.address" type="text" placeholder="City, Country"
+                                :class="fieldClass(errors.address)" />
+                            <span v-if="errors.address" class="field-error">{{ errors.address[0] }}</span>
                         </div>
+
                     </div>
+                </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-1 gap-6 my-3">
+                <!-- ── Section: Education ── -->
+                <div class="bg-white rounded-xl border border-slate-100 p-6">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2 mb-5">
+                        <span class="w-1 h-5 rounded bg-red-500 inline-block"></span>
+                        Education
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                        <!-- Education Batch -->
                         <div>
-                            <label class="block font-medium mb-1">Address</label>
-                            <input v-model="form.address" type="text"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300" />
-                            <span v-if="errors.address" class="text-red-500 text-sm mt-1">{{ errors.address[0] }}</span>
+                            <label class="field-label">Education Batch <span class="optional">(optional)</span></label>
+                            <input v-model="form.education_batch" type="text" placeholder="e.g., 2018-2022"
+                                :class="fieldClass(errors.education_batch)" />
+                            <span v-if="errors.education_batch" class="field-error">{{ errors.education_batch[0]
+                            }}</span>
                         </div>
-                    </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Player Information -->
+                        <!-- SSC Batch -->
                         <div>
-                            <label class="block font-medium mb-1">Player Type</label>
+                            <label class="field-label">SSC Batch <span class="optional">(optional)</span></label>
+                            <input v-model="form.ssc_batch" type="text" placeholder="e.g., 2018"
+                                :class="fieldClass(errors.ssc_batch)" />
+                            <span v-if="errors.ssc_batch" class="field-error">{{ errors.ssc_batch[0] }}</span>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ── Section: Favourites ── -->
+                <div class="bg-white rounded-xl border border-slate-100 p-6">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2 mb-5">
+                        <span class="w-1 h-5 rounded bg-red-500 inline-block"></span>
+                        Favourites
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                        <div>
+                            <label class="field-label">Favourite Cricket Country <span
+                                    class="optional">(optional)</span></label>
+                            <input v-model="form.favourite_cricket_country" type="text" placeholder="e.g., Bangladesh"
+                                :class="fieldClass(errors.favourite_cricket_country)" />
+                            <span v-if="errors.favourite_cricket_country" class="field-error">{{
+                                errors.favourite_cricket_country[0] }}</span>
+                        </div>
+
+                        <div>
+                            <label class="field-label">Favourite Football Country <span
+                                    class="optional">(optional)</span></label>
+                            <input v-model="form.favourite_football_country" type="text" placeholder="e.g., Brazil"
+                                :class="fieldClass(errors.favourite_football_country)" />
+                            <span v-if="errors.favourite_football_country" class="field-error">{{
+                                errors.favourite_football_country[0] }}</span>
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label class="field-label">Favourite Football League Team <span
+                                    class="optional">(optional)</span></label>
+                            <input v-model="form.favourite_football_league_team" type="text"
+                                placeholder="e.g., Barcelona"
+                                :class="fieldClass(errors.favourite_football_league_team)" />
+                            <span v-if="errors.favourite_football_league_team" class="field-error">{{
+                                errors.favourite_football_league_team[0] }}</span>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ── Section: Cricket Details ── -->
+                <div class="bg-white rounded-xl border border-slate-100 p-6">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2 mb-5">
+                        <span class="w-1 h-5 rounded bg-red-500 inline-block"></span>
+                        Cricket Details
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                        <!-- Player Type (disabled) -->
+                        <div>
+                            <label class="field-label">Player Type</label>
                             <select v-model="form.player_type"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
+                                class="w-full px-3 py-2.5 text-sm rounded-lg border border-slate-200 bg-slate-100 text-slate-500 cursor-not-allowed"
                                 disabled>
                                 <option value="registered">Registered</option>
                                 <option value="guest">Guest</option>
                             </select>
                             <input type="hidden" name="player_type" v-model="form.player_type" />
-                            <span v-if="errors.player_type" class="text-red-500 text-sm mt-1">{{ errors.player_type[0]
-                            }}</span>
+                            <span v-if="errors.player_type" class="field-error">{{ errors.player_type[0] }}</span>
+                            <p class="text-xs text-slate-400 mt-1 m-0">Automatically set to Guest</p>
                         </div>
 
+                        <!-- Player Role -->
                         <div>
-                            <label class="block font-medium mb-1">Player Role</label>
-                            <select v-model="form.player_role"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300">
-                                <option value="">Select</option>
+                            <label class="field-label">Player Role <span class="optional">(optional)</span></label>
+                            <select v-model="form.player_role" :class="fieldClass(errors.player_role)">
+                                <option value="">Select Role</option>
                                 <option value="batsman">Batsman</option>
                                 <option value="bowler">Bowler</option>
                                 <option value="all-rounder">All Rounder</option>
                                 <option value="wicketkeeper">Wicket Keeper</option>
                             </select>
-                            <span v-if="errors.player_role" class="text-red-500 text-sm mt-1">{{ errors.player_role[0]
-                            }}</span>
+                            <span v-if="errors.player_role" class="field-error">{{ errors.player_role[0] }}</span>
                         </div>
 
+                        <!-- Batting Style -->
                         <div>
-                            <label class="block font-medium mb-1">Batting Style</label>
-                            <select v-model="form.batting_style"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300">
-                                <option value="">Select</option>
+                            <label class="field-label">Batting Style <span class="optional">(optional)</span></label>
+                            <select v-model="form.batting_style" :class="fieldClass(errors.batting_style)">
+                                <option value="">Select Style</option>
                                 <option value="right-handed">Right-handed</option>
                                 <option value="left-handed">Left-handed</option>
                                 <option value="switch hitter">Switch Hitter</option>
                             </select>
-                            <span v-if="errors.batting_style" class="text-red-500 text-sm mt-1">{{
-                                errors.batting_style[0] }}</span>
+                            <span v-if="errors.batting_style" class="field-error">{{ errors.batting_style[0] }}</span>
                         </div>
 
+                        <!-- Bowling Style -->
                         <div>
-                            <label class="block font-medium mb-1">Bowling Style</label>
-                            <select v-model="form.bowling_style"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300">
-                                <option value="">Select</option>
+                            <label class="field-label">Bowling Style <span class="optional">(optional)</span></label>
+                            <select v-model="form.bowling_style" :class="fieldClass(errors.bowling_style)">
+                                <option value="">Select Style</option>
                                 <option value="fast">Fast</option>
                                 <option value="medium">Medium</option>
                                 <option value="spin">Spin</option>
                                 <option value="none">None</option>
                             </select>
-                            <span v-if="errors.bowling_style" class="text-red-500 text-sm mt-1">{{
-                                errors.bowling_style[0] }}</span>
+                            <span v-if="errors.bowling_style" class="field-error">{{ errors.bowling_style[0] }}</span>
                         </div>
 
+                    </div>
+                </div>
+
+                <!-- ── Section: Jersey & Kit ── -->
+                <div class="bg-white rounded-xl border border-slate-100 p-6">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2 mb-5">
+                        <span class="w-1 h-5 rounded bg-red-500 inline-block"></span>
+                        Jersey &amp; Kit
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                        <!-- Jersey Number -->
                         <div>
-                            <label class="block font-medium mb-1">Jersey Number</label>
-                            <input v-model="form.jursey_number" type="text"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
-                                placeholder="e.g., 10" />
-                            <span v-if="errors.jursey_number" class="text-red-500 text-sm mt-1">{{
-                                errors.jursey_number[0] }}</span>
+                            <label class="field-label">Jersey Number <span class="optional">(optional)</span></label>
+                            <input v-model="form.jursey_number" type="text" placeholder="e.g., 10"
+                                :class="fieldClass(errors.jursey_number)" />
+                            <span v-if="errors.jursey_number" class="field-error">{{ errors.jursey_number[0] }}</span>
                         </div>
 
+                        <!-- Jersey Name -->
                         <div>
-                            <label class="block font-medium mb-1">Jersey Name</label>
-                            <input v-model="form.jursey_name" type="text"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
-                                placeholder="e.g., Al-Amin" />
-                            <span v-if="errors.jursey_name" class="text-red-500 text-sm mt-1">{{ errors.jursey_name[0]
-                            }}</span>
+                            <label class="field-label">Jersey Name <span class="optional">(optional)</span></label>
+                            <input v-model="form.jursey_name" type="text" placeholder="e.g., Al-Amin"
+                                :class="fieldClass(errors.jursey_name)" />
+                            <span v-if="errors.jursey_name" class="field-error">{{ errors.jursey_name[0] }}</span>
                         </div>
 
+                        <!-- Chest Measurement -->
                         <div>
-                            <label class="block font-medium mb-1">Jersey Size</label>
-                            <div class="flex flex-wrap gap-2">
-                                <label class="flex items-center space-x-2">
-                                    <input type="radio" value="s" v-model="form.jursey_size" class="form-radio" />
-                                    <span>S</span>
-                                </label>
-                                <label class="flex items-center space-x-2">
-                                    <input type="radio" value="m" v-model="form.jursey_size" class="form-radio" />
-                                    <span>M</span>
-                                </label>
-                                <label class="flex items-center space-x-2">
-                                    <input type="radio" value="l" v-model="form.jursey_size" class="form-radio" />
-                                    <span>L</span>
-                                </label>
-                                <label class="flex items-center space-x-2">
-                                    <input type="radio" value="xl" v-model="form.jursey_size" class="form-radio" />
-                                    <span>XL</span>
-                                </label>
-                                <label class="flex items-center space-x-2">
-                                    <input type="radio" value="2xl" v-model="form.jursey_size" class="form-radio" />
-                                    <span>2XL</span>
-                                </label>
-                                <label class="flex items-center space-x-2">
-                                    <input type="radio" value="3xl" v-model="form.jursey_size" class="form-radio" />
-                                    <span>3XL</span>
-                                </label>
-                                <label class="flex items-center space-x-2">
-                                    <input type="radio" value="4xl" v-model="form.jursey_size" class="form-radio" />
-                                    <span>4XL</span>
-                                </label>
-                            </div>
-                            <span v-if="errors.jursey_size" class="text-red-500 text-sm mt-1">{{ errors.jursey_size[0]
-                            }}</span>
-                        </div>
-
-                        <div>
-                            <label class="block font-medium mb-1">Chest Measurement</label>
-                            <input v-model="form.chest_measurement" type="text"
-                                class="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
-                                placeholder="e.g., 38.5" />
-                            <span v-if="errors.chest_measurement" class="text-red-500 text-sm mt-1">{{
+                            <label class="field-label">Chest Measurement (inches) <span
+                                    class="optional">(optional)</span></label>
+                            <input v-model="form.chest_measurement" type="text" placeholder="e.g., 38.5"
+                                :class="fieldClass(errors.chest_measurement)" />
+                            <span v-if="errors.chest_measurement" class="field-error">{{
                                 errors.chest_measurement[0] }}</span>
                         </div>
-                    </div>
 
-                    <div class="col-span-1 md:col-span-2 text-center mt-8">
-                        <button type="submit"
-                            class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition font-medium text-lg">
-                            Submit Registration
-                        </button>
+                        <!-- Jersey Size (radio) -->
+                        <div>
+                            <label class="field-label">
+                                Jersey Size <span class="optional">(optional)</span>
+                            </label>
+                            <!-- <p class="text-xs text-slate-400 mt-0.5 mb-2 m-0">Select your preferred jersey size</p> -->
+                            <div class="flex flex-wrap gap-2">
+                                <label v-for="size in ['s', 'm', 'l', 'xl', '2xl', '3xl', '4xl']" :key="size"
+                                    class="cursor-pointer">
+                                    <input type="radio" :value="size" v-model="form.jursey_size" class="sr-only peer" />
+                                    <span :class="[
+                                        'inline-flex items-center justify-center rounded-lg border-2 font-bold text-xs transition-all duration-150 select-none',
+                                        'min-w-[48px] px-3 py-2',
+                                        form.jursey_size === size
+                                            ? 'border-red-600 bg-red-600 text-white shadow-sm scale-[1.04]'
+                                            : 'border-slate-200 bg-white text-slate-600 hover:border-red-400 hover:text-red-600 hover:bg-red-50'
+                                    ]">
+                                        {{ size.toUpperCase() }}
+                                    </span>
+                                </label>
+                            </div>
+                            <span v-if="errors.jursey_size" class="field-error">{{ errors.jursey_size[0] }}</span>
+                        </div>
+
                     </div>
-                </form>
-            </div>
+                </div>
+
+                <!-- ── Submit ── -->
+                <div class="flex items-center justify-end gap-4">
+                    <p class="text-xs text-slate-400 m-0">
+                        Fields marked <span class="text-red-500 font-semibold">*</span> are required.
+                    </p>
+                    <button type="submit" :disabled="submitting"
+                        class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold px-7 py-3 rounded-xl transition-colors shadow-sm">
+                        <svg v-if="submitting" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor"
+                            stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        {{ submitting ? 'Submitting...' : 'Submit Registration' }}
+                    </button>
+                </div>
+
+            </form>
         </div>
     </section>
 </template>
@@ -446,6 +517,14 @@ const cropperRef = ref(null)
 const croppedImageUrl = ref('')
 const croppedBlob = ref(null)
 const errors = reactive({})
+const submitting = ref(false)
+
+// Helper: consistent field class
+const fieldClass = (fieldErrors) => [
+    'w-full px-3 py-2.5 text-sm rounded-lg border bg-slate-50 text-slate-800 placeholder-slate-400',
+    'focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition',
+    fieldErrors ? 'border-red-400' : 'border-slate-200'
+]
 
 const triggerFileInput = () => {
     fileInput.value.click()
@@ -634,6 +713,8 @@ const submitForm = async () => {
     // Add original filename for reference
     formData.append('original_filename', imageFile.value.name)
 
+    submitting.value = true
+
     try {
         const response = await axios.post(API_BASE_URL + '/registration', formData, {
             headers: {
@@ -667,6 +748,8 @@ const submitForm = async () => {
             toast.error("Registration failed. Please check your connection and try again.")
             console.error('Error:', err.response?.data || err.message)
         }
+    } finally {
+        submitting.value = false
     }
 }
 
@@ -685,69 +768,58 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.el-form-item {
-    margin-bottom: 20px;
+/* Field label utility */
+.field-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-/* Hide the default radio input */
-.form-radio {
-    display: none;
+.field-error {
+    display: block;
+    font-size: 0.75rem;
+    color: #ef4444;
+    margin-top: 0.25rem;
 }
 
-/* Custom radio wrapper */
-.form-radio+span {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    border: 2px solid #ccc;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-weight: 500;
-    user-select: none;
-    min-width: 3rem;
-    text-align: center;
+.optional {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
 }
 
-/* Hover effect */
-.form-radio+span:hover {
-    border-color: #61CE70;
-    background-color: rgba(97, 206, 112, 0.1);
-}
-
-/* Checked state */
-.form-radio:checked+span {
-    background-color: #61CE70;
-    color: white;
-    border-color: #61CE70;
-}
-
-/* Cropper container styling */
+/* Cropper container */
 :deep(.cropper-container) {
     width: 100%;
-    height: 400px;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    height: 380px;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Cropper.js custom styles */
+/* Circular crop view */
 :deep(.cropper-view-box),
 :deep(.cropper-face) {
     border-radius: 50%;
 }
 
 :deep(.cropper-view-box) {
-    outline: 2px solid #3b82f6;
-    outline-color: rgba(59, 130, 246, 0.75);
+    outline: 2px solid #dc2626;
+    outline-color: rgba(220, 38, 38, 0.75);
 }
 
 :deep(.cropper-line) {
-    background-color: #3b82f6;
+    background-color: #dc2626;
 }
 
 :deep(.cropper-point) {
-    background-color: #3b82f6;
+    background-color: #dc2626;
     width: 8px;
     height: 8px;
 }
@@ -757,41 +829,9 @@ onMounted(() => {
     height: 12px;
 }
 
-/* Form input focus styles */
-input:focus,
-select:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-/* File upload area */
-.drag-drop-area {
-    border: 2px dashed #d1d5db;
-    border-radius: 8px;
-    padding: 2rem;
-    text-align: center;
-    transition: border-color 0.3s;
-    cursor: pointer;
-}
-
-.drag-drop-area:hover {
-    border-color: #3b82f6;
-    background-color: rgba(59, 130, 246, 0.05);
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .flex-wrap {
-        gap: 0.5rem;
-    }
-
-    .form-radio+span {
-        padding: 0.4rem 0.8rem;
-        min-width: 2.5rem;
-    }
-
+@media (max-width: 640px) {
     :deep(.cropper-container) {
-        height: 300px !important;
+        height: 280px;
     }
 }
 </style>

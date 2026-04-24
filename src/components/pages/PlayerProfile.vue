@@ -1,200 +1,652 @@
 <template>
-    <section id="home" class="bg-home player-header bg-cover bg-center" :style="{ backgroundImage: `url(${bgHome})` }">
-        <div class="flex items-center justify-center py-24 pb-5" style="padding-bottom: 0rem; padding-top: 7rem;">
-            <div class="container mx-auto px-4">
-                <div class="mb-12">
-                    <!-- Data State with Slider -->
-                    <div class="relative overflow-hidden" v-if="playerData">
-                        <header class="profile-header">
-                            <div class="header-content">
-                                <img :src="playerData.user?.image || 'default-player.png'"
-                                    :alt="playerData.user?.full_name" class="player-avatar" />
-                                <div class="player-vitals">
-                                    <h1>{{ playerData.user?.full_name || 'Unknown Player' }}</h1>
-                                    <p class="player-meta">
-                                        {{ calculateAge(playerData.debut_date) }} •
-                                        {{ playerData.country || 'Unknown' }} •
-                                        {{ playerData.role || 'Player' }}
-                                    </p>
-                                </div>
-                            </div>
-                        </header>
+    <!-- ==================== LOADING ==================== -->
+    <div v-if="loading">
+        <!-- Dark hero skeleton -->
+        <div class="relative overflow-hidden" style="background-color: #0f172a; min-height: 220px;">
+            <div class="container mx-auto px-4 py-10" style="padding-top: 6rem;">
+                <div class="flex items-center gap-4">
+                    <div class="w-20 h-20 rounded-full bg-white/10 animate-pulse flex-shrink-0"></div>
+                    <div class="flex-1 space-y-3">
+                        <div class="h-5 bg-white/10 rounded w-48 animate-pulse"></div>
+                        <div class="h-4 bg-white/10 rounded w-64 animate-pulse"></div>
+                        <div class="flex gap-2">
+                            <div class="h-5 bg-white/10 rounded-full w-16 animate-pulse"></div>
+                            <div class="h-5 bg-white/10 rounded-full w-20 animate-pulse"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
-    <section class="bg-center">
-        <div class="flex items-center justify-center py-20 pb-5" style="padding-top: 0px;">
+        <!-- Tab bar skeleton -->
+        <div class="bg-white border-b border-slate-200 h-12"></div>
+        <!-- Content skeleton -->
+        <section class="bg-slate-50 py-8">
             <div class="container mx-auto px-4">
-                <div class="player-profile">
-                    <div v-if="loading" class="loading-container">
-                        <div class="loading-spinner"></div>
-                        <p>Loading player profile...</p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                    <div v-for="i in 4" :key="i"
+                        class="bg-white rounded-xl border border-slate-100 p-4 animate-pulse">
+                        <div class="h-6 bg-slate-200 rounded w-2/3 mx-auto mb-2"></div>
+                        <div class="h-3 bg-slate-100 rounded w-1/2 mx-auto"></div>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div v-for="i in 5" :key="i"
+                        class="bg-white rounded-xl border border-slate-100 p-3 animate-pulse">
+                        <div class="h-3.5 bg-slate-200 rounded w-1/3 mb-2"></div>
+                        <div class="h-3 bg-slate-100 rounded w-2/3"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ==================== ERROR ==================== -->
+    <div v-else-if="error" class="bg-slate-50 min-h-screen flex items-center justify-center"
+        style="padding-top: 64px;">
+        <div class="text-center px-4">
+            <div
+                class="text-center py-8 text-red-500 text-sm bg-white rounded-xl border border-red-100 px-8 max-w-sm mx-auto">
+                <p class="mb-4">{{ errorMessage || 'Failed to load player profile.' }}</p>
+                <div class="flex justify-center gap-3">
+                    <button @click="retryLoading"
+                        class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-sm rounded-lg transition">
+                        Retry
+                    </button>
+                    <router-link to="/players"
+                        class="px-4 py-2 border border-slate-200 text-slate-600 text-sm rounded-lg hover:bg-slate-50 transition no-underline">
+                        All Players
+                    </router-link>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== NOT FOUND ==================== -->
+    <div v-else-if="!playerData" class="bg-slate-50 min-h-screen flex items-center justify-center"
+        style="padding-top: 64px;">
+        <div
+            class="text-center py-10 text-slate-400 bg-white rounded-xl border border-slate-100 px-8 max-w-sm mx-auto">
+            <p class="mb-4 text-sm">Player not found.</p>
+            <router-link to="/players"
+                class="inline-block px-4 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 text-sm font-semibold transition no-underline">
+                Browse Players
+            </router-link>
+        </div>
+    </div>
+
+    <!-- ==================== PLAYER PROFILE ==================== -->
+    <div v-else>
+
+        <!-- HERO -->
+        <section class="relative overflow-hidden" style="background-color: #0f172a;">
+            <div class="absolute inset-0 bg-cover bg-center opacity-10 pointer-events-none"
+                :style="{ backgroundImage: `url(${bgHome})` }"></div>
+
+            <div class="relative z-10 container mx-auto px-4 py-10" style="padding-top: 6rem;">
+
+                <!-- Back link -->
+                <div class="mb-5">
+                    <router-link to="/players"
+                        class="inline-flex items-center gap-1.5 text-slate-400 hover:text-white text-xs font-medium transition no-underline">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 19l-7-7 7-7" />
+                        </svg>
+                        All Players
+                    </router-link>
+                </div>
+
+                <!-- Player card -->
+                <div class="flex items-start gap-4 sm:gap-6 flex-wrap sm:flex-nowrap">
+
+                    <!-- Avatar -->
+                    <div
+                        class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-white/10 flex items-center justify-center flex-shrink-0 border-2 border-white/20">
+                        <img v-if="playerData.user?.image" :src="playerData.user.image"
+                            :alt="playerData.user?.full_name"
+                            class="w-full h-full object-cover"
+                            @error="$event.target.style.display = 'none'" />
+                        <span v-else class="text-white font-bold text-2xl">
+                            {{ playerInitials }}
+                        </span>
                     </div>
 
-                    <!-- Error State -->
-                    <div v-else-if="error" class="error-container">
-                        <p class="error-message">{{ errorMessage }}</p>
-                        <button @click="retryLoading" class="btn-retry">Retry</button>
-                    </div>
+                    <!-- Info -->
+                    <div class="flex-1 min-w-0">
+                        <!-- Team badge -->
+                        <div v-if="playerData.teams?.[0]" class="mb-2">
+                            <span
+                                class="inline-flex items-center text-xs bg-white/10 border border-white/20 text-slate-300 px-2.5 py-0.5 rounded-full font-medium">
+                                {{ playerData.teams[0].abbreviation || playerData.teams[0].name }}
+                            </span>
+                        </div>
 
-                    <!-- Player Data -->
-                    <div v-else-if="playerData" class="player-content">
-                        <!-- Tab Navigation -->
-                        <nav class="profile-tabs">
-                            <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
-                                :class="{ 'active': activeTab === tab.id }">
-                                {{ tab.label }}
-                            </button>
-                        </nav>
+                        <h1 class="text-white text-2xl sm:text-3xl font-bold m-0 leading-tight">
+                            {{ playerData.user?.full_name || 'Unknown Player' }}
+                        </h1>
 
-                        <!-- Tab Content -->
-                        <div class="tab-content">
-                            <!-- Overview Tab -->
-                            <section v-if="activeTab === 'overview'" class="overview-grid">
-                                <div class="stat-card" v-for="stat in keyStats" :key="stat.label">
-                                    <div class="stat-value">{{ stat.value }}</div>
-                                    <div class="stat-label">{{ stat.label }}</div>
-                                </div>
-                                <div class="recent-form">
-                                    <h3>Recent Form</h3>
-                                    <div v-if="playerData.recent_matches && playerData.recent_matches.length > 0"
-                                        class="form-chart">
-                                        <div v-for="match in playerData.recent_matches.slice(0, 5)"
-                                            :key="match.match_id" class="form-point"
-                                            :class="getFormClass(match.performance)">
-                                            <span class="form-value">
-                                                {{ match.performance.runs_scored || 0 }}/{{
-                                                    match.performance.wickets_taken || 0 }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <p v-else class="no-data">No recent matches</p>
-                                </div>
-                            </section>
-
-                            <!-- Career Stats Tab -->
-                            <section v-if="activeTab === 'career'" class="career-stats">
-                                <div class="format-filters">
-                                    <button v-for="format in Object.keys(careerStatsByFormat)" :key="format"
-                                        @click="selectedFormat = format"
-                                        :class="{ 'active': selectedFormat === format }">
-                                        {{ format.toUpperCase() }}
-                                    </button>
-                                </div>
-                                <table class="stats-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Matches</th>
-                                            <th>Runs</th>
-                                            <th>Avg</th>
-                                            <th>SR</th>
-                                            <th>Wkts</th>
-                                            <th>Bowl Avg</th>
-                                            <th>Econ</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-if="careerStatsByFormat[selectedFormat]">
-                                            <td>{{ careerStatsByFormat[selectedFormat].matches || 0 }}</td>
-                                            <td>{{ careerStatsByFormat[selectedFormat].runs || 0 }}</td>
-                                            <td>{{ formatNumber(careerStatsByFormat[selectedFormat].average) }}</td>
-                                            <td>{{ formatNumber(careerStatsByFormat[selectedFormat].strike_rate) }}</td>
-                                            <td>{{ careerStatsByFormat[selectedFormat].wickets || 0 }}</td>
-                                            <td>{{ formatNumber(careerStatsByFormat[selectedFormat].bowling_average) }}
-                                            </td>
-                                            <td>{{ formatNumber(careerStatsByFormat[selectedFormat].economy) }}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </section>
-
-                            <!-- Matches Tab -->
-                            <section v-if="activeTab === 'matches'" class="matches-section">
-                                <div class="matches-header">
-                                    <h3>Recent Matches</h3>
-                                    <select v-model="matchesFilter" class="matches-filter">
-                                        <option value="all">All Matches</option>
-                                        <option value="odi">ODI</option>
-                                        <option value="t20">T20</option>
-                                        <option value="test">Test</option>
-                                    </select>
-                                </div>
-                                <ul class="match-list">
-                                    <li v-for="match in filteredMatches" :key="match.match_id" class="match-item">
-                                        <div class="match-info">
-                                            <span class="match-teams">
-                                                {{ match.teams?.team_a?.name || 'Team A' }} vs {{
-                                                    match.teams?.team_b?.name || 'Team B' }}
-                                            </span>
-                                            <span class="match-date">{{ formatDate(match.match_date) }}</span>
-                                        </div>
-                                        <div class="match-performance">
-                                            <span class="performance-runs" v-if="match.performance.runs_scored">
-                                                {{ match.performance.runs_scored }} runs
-                                            </span>
-                                            <span class="performance-wickets" v-if="match.performance.wickets_taken">
-                                                {{ match.performance.wickets_taken }} wkts
-                                            </span>
-                                            <span
-                                                v-if="!match.performance.runs_scored && !match.performance.wickets_taken">
-                                                Did not play
-                                            </span>
-                                        </div>
-                                    </li>
-                                </ul>
-                                <p v-if="filteredMatches.length === 0" class="no-matches">No matches found</p>
-                            </section>
-
-                            <!-- Player Info Tab -->
-                            <section v-if="activeTab === 'info'" class="player-info-grid">
-                                <div class="info-section">
-                                    <h3>Personal Information</h3>
-                                    <div class="info-item">
-                                        <strong>Full Name:</strong>
-                                        <span>{{ playerData.user?.full_name || 'N/A' }}</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <strong>Playing Role:</strong>
-                                        <span>{{ playerData.role || 'N/A' }}</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <strong>Batting Style:</strong>
-                                        <span>{{ formatStyle(playerData.batting_style) }}</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <strong>Bowling Style:</strong>
-                                        <span>{{ formatStyle(playerData.bowling_style) }}</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <strong>Debut:</strong>
-                                        <span>{{ playerData.debut_date ? formatDate(playerData.debut_date) : 'N/A'
-                                        }}</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <strong>Teams:</strong>
-                                        <span>{{ playerTeams }}</span>
-                                    </div>
-                                </div>
-
-                                <div class="info-section" v-if="playerData.player_info?.bio">
-                                    <h3>Biography</h3>
-                                    <p class="player-bio">{{ playerData.player_info.bio }}</p>
-                                </div>
-                            </section>
+                        <!-- Meta badges -->
+                        <div class="flex items-center gap-2 mt-3 flex-wrap">
+                            <span v-if="playerData.role"
+                                class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-semibold capitalize">
+                                {{ playerData.role }}
+                            </span>
+                            <span v-if="playerData.batting_style"
+                                class="text-xs bg-blue-500/20 border border-blue-400/30 text-blue-300 px-2 py-0.5 rounded font-medium">
+                                🏏 {{ formatStyle(playerData.batting_style) }}
+                            </span>
+                            <span v-if="playerData.bowling_style"
+                                class="text-xs bg-amber-500/20 border border-amber-400/30 text-amber-300 px-2 py-0.5 rounded font-medium">
+                                🎳 {{ formatStyle(playerData.bowling_style) }}
+                            </span>
+                            <span v-if="playerData.debut_date"
+                                class="text-xs text-slate-400 font-medium">
+                                Age {{ calculateAge(playerData.debut_date) }}
+                            </span>
                         </div>
                     </div>
 
-                    <!-- Player Not Found -->
-                    <div v-else class="not-found-container">
-                        <p>Player not found</p>
-                        <router-link to="/" class="btn-home">Back to Home</router-link>
+                    <!-- Quick stats (desktop) -->
+                    <div class="hidden sm:flex gap-3 flex-shrink-0">
+                        <div
+                            class="text-center rounded-xl border border-white/10 bg-white/5 px-5 py-3 min-w-[72px]">
+                            <div class="text-yellow-300 text-xl font-bold leading-none">{{
+                                playerData.statistics?.matches_played || 0 }}</div>
+                            <div class="text-slate-400 text-xs mt-1">Matches</div>
+                        </div>
+                        <div
+                            class="text-center rounded-xl border border-white/10 bg-white/5 px-5 py-3 min-w-[72px]">
+                            <div class="text-yellow-300 text-xl font-bold leading-none">{{
+                                playerData.statistics?.total_runs || 0 }}</div>
+                            <div class="text-slate-400 text-xs mt-1">Runs</div>
+                        </div>
+                        <div
+                            class="text-center rounded-xl border border-white/10 bg-white/5 px-5 py-3 min-w-[72px]">
+                            <div class="text-yellow-300 text-xl font-bold leading-none">{{
+                                playerData.statistics?.wickets || 0 }}</div>
+                            <div class="text-slate-400 text-xs mt-1">Wickets</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile quick stats -->
+                <div class="sm:hidden flex gap-4 mt-5 pt-4 border-t border-white/10">
+                    <div class="text-center flex-1">
+                        <div class="text-yellow-300 text-lg font-bold">{{ playerData.statistics?.matches_played ||
+                            0 }}</div>
+                        <div class="text-slate-400 text-xs mt-0.5">Matches</div>
+                    </div>
+                    <div class="text-center flex-1">
+                        <div class="text-yellow-300 text-lg font-bold">{{ playerData.statistics?.total_runs || 0
+                            }}</div>
+                        <div class="text-slate-400 text-xs mt-0.5">Runs</div>
+                    </div>
+                    <div class="text-center flex-1">
+                        <div class="text-yellow-300 text-lg font-bold">{{ playerData.statistics?.wickets || 0 }}
+                        </div>
+                        <div class="text-slate-400 text-xs mt-0.5">Wickets</div>
+                    </div>
+                    <div class="text-center flex-1">
+                        <div class="text-yellow-300 text-lg font-bold">{{
+                            formatNumber(playerData.statistics?.strike_rate) }}</div>
+                        <div class="text-slate-400 text-xs mt-0.5">SR</div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+
+        <!-- STICKY TABS -->
+        <nav class="sticky z-20 bg-white border-b border-slate-200 shadow-sm" style="top: 64px;">
+            <div class="container mx-auto px-4">
+                <div class="flex overflow-x-auto hide-scrollbar">
+                    <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
+                        class="flex-shrink-0 px-5 py-3.5 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors"
+                        :class="activeTab === tab.id
+                            ? 'border-red-600 text-red-600'
+                            : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'">
+                        {{ tab.label }}
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- TAB CONTENT -->
+        <section class="bg-slate-50 py-8">
+            <div class="container mx-auto px-4">
+
+                <!-- ── OVERVIEW ── -->
+                <div v-if="activeTab === 'overview'">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                        <!-- Left: stats + career + recent form -->
+                        <div class="lg:col-span-2 space-y-5">
+
+                            <!-- 8 stat cards -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <div v-for="stat in keyStats" :key="stat.label"
+                                    class="bg-white rounded-xl border border-slate-100 p-4 text-center">
+                                    <div class="text-xl font-bold text-slate-800">{{ stat.value }}</div>
+                                    <div class="text-xs text-slate-400 mt-1">{{ stat.label }}</div>
+                                </div>
+                            </div>
+
+                            <!-- Career Stats -->
+                            <div class="bg-white rounded-xl border border-slate-100 overflow-hidden">
+                                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+                                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2 m-0">
+                                        <span class="w-1 h-4 rounded bg-red-500 inline-block"></span>
+                                        Career Stats
+                                    </h3>
+                                    <!-- Format pills -->
+                                    <div class="flex gap-1 flex-wrap">
+                                        <button v-for="(_, fmt) in careerStatsByFormat" :key="fmt"
+                                            @click="selectedFormat = fmt"
+                                            class="px-3 py-1 text-xs font-semibold rounded-full border transition-all"
+                                            :class="selectedFormat === fmt
+                                                ? 'bg-red-600 text-white border-red-600'
+                                                : 'bg-white text-slate-600 border-slate-200 hover:border-red-300'">
+                                            {{ fmt.toUpperCase() }}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div v-if="Object.keys(careerStatsByFormat).length" class="overflow-x-auto">
+                                    <table class="w-full text-sm">
+                                        <thead>
+                                            <tr class="border-b border-slate-100 bg-slate-50">
+                                                <th
+                                                    class="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                                                    Format</th>
+                                                <th
+                                                    class="px-4 py-2.5 text-center text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                                                    Mat</th>
+                                                <th
+                                                    class="px-4 py-2.5 text-center text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                                                    Runs</th>
+                                                <th
+                                                    class="px-4 py-2.5 text-center text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                                                    Avg</th>
+                                                <th
+                                                    class="px-4 py-2.5 text-center text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                                                    SR</th>
+                                                <th
+                                                    class="px-4 py-2.5 text-center text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                                                    Wkts</th>
+                                                <th
+                                                    class="px-4 py-2.5 text-center text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                                                    Econ</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="(stats, fmt) in careerStatsByFormat" :key="fmt"
+                                                class="border-b border-slate-50 last:border-0 transition-colors"
+                                                :class="selectedFormat === fmt ? 'bg-red-50' : 'hover:bg-slate-50'">
+                                                <td class="px-4 py-2.5 text-xs font-bold text-slate-700">{{
+                                                    fmt.toUpperCase() }}</td>
+                                                <td class="px-4 py-2.5 text-center text-xs text-slate-600">{{
+                                                    stats.matches || 0 }}</td>
+                                                <td
+                                                    class="px-4 py-2.5 text-center text-xs font-semibold text-slate-800">
+                                                    {{ stats.runs || 0 }}</td>
+                                                <td class="px-4 py-2.5 text-center text-xs text-slate-600">{{
+                                                    formatNumber(stats.average) }}</td>
+                                                <td class="px-4 py-2.5 text-center text-xs text-slate-600">{{
+                                                    formatNumber(stats.strike_rate) }}</td>
+                                                <td
+                                                    class="px-4 py-2.5 text-center text-xs font-semibold text-slate-800">
+                                                    {{ stats.wickets || 0 }}</td>
+                                                <td class="px-4 py-2.5 text-center text-xs text-slate-600">{{
+                                                    formatNumber(stats.economy) }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div v-else class="text-center py-8 text-slate-400 text-sm">
+                                    No career stats available.
+                                </div>
+                            </div>
+
+                            <!-- Recent Form -->
+                            <div class="bg-white rounded-xl border border-slate-100 overflow-hidden">
+                                <div class="px-4 py-3 border-b border-slate-100">
+                                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2 m-0">
+                                        <span class="w-1 h-4 rounded bg-red-500 inline-block"></span>
+                                        Recent Form
+                                    </h3>
+                                </div>
+                                <div class="px-4 py-4">
+                                    <div v-if="playerData.recent_matches?.length" class="flex flex-wrap gap-2">
+                                        <div v-for="(match, idx) in playerData.recent_matches.slice(0, 5)"
+                                            :key="match.match_id || idx"
+                                            class="flex flex-col items-center justify-center px-3 py-3 rounded-lg text-white text-center font-semibold min-w-[60px]"
+                                            :class="getFormClass(match.performance)">
+                                            <span class="text-base leading-none">{{
+                                                match.performance?.runs_scored ?? '–' }}</span>
+                                            <span class="text-xs opacity-75 mt-0.5">runs</span>
+                                            <span class="text-xs mt-1">{{
+                                                match.performance?.wickets_taken ?? '–' }}wkt</span>
+                                        </div>
+                                    </div>
+                                    <div v-else class="text-center text-slate-400 text-sm py-4">
+                                        No recent match data available.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: about + updates -->
+                        <div class="space-y-5">
+
+                            <!-- About Player -->
+                            <div class="bg-white rounded-xl border border-slate-100 overflow-hidden">
+                                <div class="px-4 py-3 border-b border-slate-100">
+                                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2 m-0">
+                                        <span class="w-1 h-4 rounded bg-red-500 inline-block"></span>
+                                        About Player
+                                    </h3>
+                                </div>
+                                <div class="divide-y divide-slate-50">
+                                    <div class="flex justify-between items-start gap-3 px-4 py-2.5">
+                                        <span class="text-xs text-slate-500 flex-shrink-0 mt-0.5">Full Name</span>
+                                        <span class="text-xs font-semibold text-slate-800 text-right">{{
+                                            playerData.user?.full_name || 'N/A' }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-start gap-3 px-4 py-2.5">
+                                        <span class="text-xs text-slate-500 flex-shrink-0 mt-0.5">Role</span>
+                                        <span class="text-xs font-semibold text-slate-800 text-right capitalize">{{
+                                            playerData.role || 'N/A' }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-start gap-3 px-4 py-2.5">
+                                        <span class="text-xs text-slate-500 flex-shrink-0 mt-0.5">Batting</span>
+                                        <span class="text-xs font-semibold text-slate-800 text-right">{{
+                                            formatStyle(playerData.batting_style) || 'N/A' }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-start gap-3 px-4 py-2.5">
+                                        <span class="text-xs text-slate-500 flex-shrink-0 mt-0.5">Bowling</span>
+                                        <span class="text-xs font-semibold text-slate-800 text-right">{{
+                                            formatStyle(playerData.bowling_style) || 'N/A' }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-start gap-3 px-4 py-2.5">
+                                        <span class="text-xs text-slate-500 flex-shrink-0 mt-0.5">Debut</span>
+                                        <span class="text-xs font-semibold text-slate-800 text-right">{{
+                                            playerData.debut_date ? formatDate(playerData.debut_date) : 'N/A'
+                                            }}</span>
+                                    </div>
+                                    <div v-if="playerData.country"
+                                        class="flex justify-between items-start gap-3 px-4 py-2.5">
+                                        <span class="text-xs text-slate-500 flex-shrink-0 mt-0.5">Country</span>
+                                        <span class="text-xs font-semibold text-slate-800 text-right">{{
+                                            playerData.country }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-start gap-3 px-4 py-2.5">
+                                        <span class="text-xs text-slate-500 flex-shrink-0 mt-0.5">Teams</span>
+                                        <span class="text-xs font-semibold text-slate-800 text-right">{{ playerTeams
+                                            }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Latest Updates -->
+                            <div class="bg-white rounded-xl border border-slate-100 overflow-hidden">
+                                <div class="px-4 py-3 border-b border-slate-100">
+                                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2 m-0">
+                                        <span class="w-1 h-4 rounded bg-red-500 inline-block"></span>
+                                        Latest Updates
+                                    </h3>
+                                </div>
+                                <div class="text-center py-8 text-slate-400 text-sm px-4">
+                                    News isn't available at the moment.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── MATCHES ── -->
+                <div v-if="activeTab === 'matches'">
+                    <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+                        <h2 class="text-base font-bold text-slate-800 flex items-center gap-2 m-0">
+                            <span class="w-1 h-5 rounded bg-red-500 inline-block"></span>
+                            Recent Matches
+                        </h2>
+                        <select v-model="matchesFilter"
+                            class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-300 transition">
+                            <option value="all">All Formats</option>
+                            <option value="odi">ODI</option>
+                            <option value="t20">T20</option>
+                            <option value="test">Test</option>
+                        </select>
+                    </div>
+
+                    <!-- Desktop table -->
+                    <div class="hidden md:block bg-white rounded-xl border border-slate-100 overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-slate-50 border-b border-slate-100">
+                                    <tr>
+                                        <th
+                                            class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                                            Match</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                                            Date</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                                            Runs</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                                            Balls</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                                            4s/6s</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                                            SR</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                                            Wkts</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                                            Econ</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-50">
+                                    <tr v-for="match in filteredMatches" :key="match.match_id"
+                                        class="hover:bg-slate-50 transition-colors">
+                                        <td class="px-4 py-3">
+                                            <span class="text-sm font-semibold text-slate-800">
+                                                {{ match.teams?.team_a?.name || 'Team A' }} vs {{
+                                                    match.teams?.team_b?.name || 'Team B' }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-center text-xs text-slate-500 whitespace-nowrap">
+                                            {{ formatDate(match.match_date) }}</td>
+                                        <td
+                                            class="px-4 py-3 text-center text-sm font-bold text-slate-800">
+                                            {{ match.performance?.runs_scored ?? '–' }}</td>
+                                        <td class="px-4 py-3 text-center text-xs text-slate-600">
+                                            {{ match.performance?.balls_faced ?? '–' }}</td>
+                                        <td class="px-4 py-3 text-center text-xs text-slate-600">
+                                            {{ match.performance?.fours ?? 0 }}/{{ match.performance?.sixes ?? 0 }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center text-xs text-slate-600">
+                                            {{
+                                                (match.performance?.balls_faced && match.performance?.runs_scored)
+                                                    ? ((match.performance.runs_scored /
+                                                        match.performance.balls_faced) * 100).toFixed(1)
+                                                    : '–'
+                                            }}
+                                        </td>
+                                        <td
+                                            class="px-4 py-3 text-center text-sm font-bold text-slate-800">
+                                            {{ match.performance?.wickets_taken ?? '–' }}</td>
+                                        <td class="px-4 py-3 text-center text-xs text-slate-600">
+                                            {{ match.performance?.economy ?? '–' }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-if="filteredMatches.length === 0"
+                            class="text-center py-10 text-slate-400 text-sm">
+                            No matches found.
+                        </div>
+                    </div>
+
+                    <!-- Mobile match cards -->
+                    <div class="md:hidden space-y-2">
+                        <div v-for="match in filteredMatches" :key="match.match_id"
+                            class="bg-white rounded-xl border border-slate-100 overflow-hidden">
+                            <div class="px-4 py-3 border-b border-slate-50">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-sm font-semibold text-slate-800">
+                                        {{ match.teams?.team_a?.name || 'Team A' }} vs {{
+                                            match.teams?.team_b?.name || 'Team B' }}
+                                    </span>
+                                    <span class="text-xs text-slate-400 flex-shrink-0">{{
+                                        formatDate(match.match_date) }}</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-4 divide-x divide-slate-50 px-0 py-0">
+                                <div class="text-center px-3 py-3">
+                                    <div class="text-sm font-bold text-slate-800">{{
+                                        match.performance?.runs_scored ?? '–' }}</div>
+                                    <div class="text-xs text-slate-400 mt-0.5">Runs</div>
+                                </div>
+                                <div class="text-center px-3 py-3">
+                                    <div class="text-sm font-bold text-slate-800">{{
+                                        match.performance?.balls_faced ?? '–' }}</div>
+                                    <div class="text-xs text-slate-400 mt-0.5">Balls</div>
+                                </div>
+                                <div class="text-center px-3 py-3">
+                                    <div class="text-sm font-bold text-slate-800">{{
+                                        match.performance?.wickets_taken ?? '–' }}</div>
+                                    <div class="text-xs text-slate-400 mt-0.5">Wkts</div>
+                                </div>
+                                <div class="text-center px-3 py-3">
+                                    <div class="text-sm font-bold text-slate-800">
+                                        {{ match.performance?.fours ?? 0 }}/{{ match.performance?.sixes ?? 0 }}
+                                    </div>
+                                    <div class="text-xs text-slate-400 mt-0.5">4s/6s</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="filteredMatches.length === 0"
+                            class="text-center py-10 text-slate-400 bg-white rounded-xl border border-slate-100 text-sm">
+                            No matches found.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── TEAMS ── -->
+                <div v-if="activeTab === 'teams'">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2 mb-5">
+                        <span class="w-1 h-5 rounded bg-red-500 inline-block"></span>
+                        Teams
+                    </h2>
+
+                    <div v-if="playerData.teams?.length" class="space-y-2">
+                        <div v-for="team in playerData.teams" :key="team.id"
+                            class="bg-white rounded-xl border border-slate-100 hover:shadow-md hover:border-slate-200 transition-all duration-200 overflow-hidden">
+                            <div class="flex items-center gap-3 p-3">
+                                <div
+                                    class="w-11 h-11 rounded-full overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center flex-shrink-0">
+                                    <img v-if="team.logo" :src="team.logo" :alt="team.name"
+                                        class="w-full h-full object-cover"
+                                        @error="$event.target.style.display = 'none'" />
+                                    <span v-else class="text-slate-500 font-bold text-sm uppercase">
+                                        {{ (team.abbreviation || team.name || '?').charAt(0) }}
+                                    </span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-semibold text-slate-800 m-0 truncate">{{ team.name }}</p>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <span v-if="team.abbreviation"
+                                            class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-medium">
+                                            {{ team.abbreviation }}
+                                        </span>
+                                        <span v-if="team.tournament_name" class="text-xs text-slate-400">{{
+                                            team.tournament_name }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-else
+                        class="text-center py-10 text-slate-400 bg-white rounded-xl border border-slate-100 text-sm">
+                        No teams assigned.
+                    </div>
+                </div>
+
+                <!-- ── INFO ── -->
+                <div v-if="activeTab === 'info'">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+                        <!-- Personal info -->
+                        <div class="bg-white rounded-xl border border-slate-100 overflow-hidden">
+                            <div class="px-4 py-3 border-b border-slate-100">
+                                <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2 m-0">
+                                    <span class="w-1 h-4 rounded bg-red-500 inline-block"></span>
+                                    Personal Information
+                                </h3>
+                            </div>
+                            <div class="divide-y divide-slate-50">
+                                <div class="flex justify-between items-center px-4 py-3">
+                                    <span class="text-xs text-slate-500">Full Name</span>
+                                    <span class="text-xs font-semibold text-slate-800">{{
+                                        playerData.user?.full_name || 'N/A' }}</span>
+                                </div>
+                                <div class="flex justify-between items-center px-4 py-3">
+                                    <span class="text-xs text-slate-500">Playing Role</span>
+                                    <span class="text-xs font-semibold text-slate-800 capitalize">{{ playerData.role
+                                        || 'N/A' }}</span>
+                                </div>
+                                <div class="flex justify-between items-center px-4 py-3">
+                                    <span class="text-xs text-slate-500">Batting Style</span>
+                                    <span class="text-xs font-semibold text-slate-800">{{
+                                        formatStyle(playerData.batting_style) || 'N/A' }}</span>
+                                </div>
+                                <div class="flex justify-between items-center px-4 py-3">
+                                    <span class="text-xs text-slate-500">Bowling Style</span>
+                                    <span class="text-xs font-semibold text-slate-800">{{
+                                        formatStyle(playerData.bowling_style) || 'N/A' }}</span>
+                                </div>
+                                <div class="flex justify-between items-center px-4 py-3">
+                                    <span class="text-xs text-slate-500">Debut Date</span>
+                                    <span class="text-xs font-semibold text-slate-800">{{
+                                        playerData.debut_date ? formatDate(playerData.debut_date) : 'N/A' }}</span>
+                                </div>
+                                <div class="flex justify-between items-start gap-3 px-4 py-3">
+                                    <span class="text-xs text-slate-500 flex-shrink-0">Teams</span>
+                                    <span class="text-xs font-semibold text-slate-800 text-right">{{ playerTeams
+                                        }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Biography -->
+                        <div class="bg-white rounded-xl border border-slate-100 overflow-hidden">
+                            <div class="px-4 py-3 border-b border-slate-100">
+                                <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2 m-0">
+                                    <span class="w-1 h-4 rounded bg-red-500 inline-block"></span>
+                                    Biography
+                                </h3>
+                            </div>
+                            <div class="px-4 py-4">
+                                <p v-if="playerData.player_info?.bio"
+                                    class="text-sm text-slate-600 leading-relaxed m-0">
+                                    {{ playerData.player_info.bio }}
+                                </p>
+                                <p v-else class="text-center text-slate-400 text-sm py-4 m-0">
+                                    No biography available.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
 </template>
 
 <script setup>
@@ -207,7 +659,7 @@ const route = useRoute();
 const router = useRouter();
 const playerSlug = route.params.slug;
 
-// Reactive variables
+// ── State ──────────────────────────────────────────────────────────────────
 const playerData = ref(null);
 const loading = ref(true);
 const error = ref(false);
@@ -215,21 +667,18 @@ const errorMessage = ref('');
 const activeTab = ref('overview');
 const selectedFormat = ref('odi');
 const matchesFilter = ref('all');
-const isFollowing = ref(false);
 
 const tabs = ref([
     { id: 'overview', label: 'Overview' },
-    { id: 'career', label: 'Career Stats' },
     { id: 'matches', label: 'Matches' },
-    { id: 'info', label: 'Player Info' }
+    { id: 'teams', label: 'Teams' },
+    { id: 'info', label: 'Info' },
 ]);
 
-const teamPrimaryColor = computed(() => {
-    return playerData.value?.teams?.[0]?.color_code || '#1e40af';
-});
-
-const playerTeamAbbreviation = computed(() => {
-    return playerData.value?.teams?.[0]?.abbreviation || 'TEAM';
+// ── Computed ───────────────────────────────────────────────────────────────
+const playerInitials = computed(() => {
+    const name = playerData.value?.user?.full_name || '';
+    return name.split(' ').map(n => n[0] || '').join('').toUpperCase().slice(0, 2) || '?';
 });
 
 const playerTeams = computed(() => {
@@ -239,54 +688,43 @@ const playerTeams = computed(() => {
 
 const keyStats = computed(() => {
     if (!playerData.value?.statistics) return [];
-
+    const s = playerData.value.statistics;
     return [
-        { label: 'Matches', value: playerData.value.statistics.matches_played || 0 },
-        { label: 'Total Runs', value: playerData.value.statistics.total_runs || 0 },
-        { label: 'Batting Avg', value: formatNumber(playerData.value.statistics.average) },
-        { label: 'Strike Rate', value: formatNumber(playerData.value.statistics.strike_rate) },
-        { label: 'Total Wickets', value: playerData.value.statistics.wickets || 0 },
-        { label: 'Bowling Avg', value: formatNumber(playerData.value.statistics.bowling_average) },
-        { label: 'Economy', value: formatNumber(playerData.value.statistics.economy_rate) },
-        { label: 'Catches', value: playerData.value.statistics.catches || 0 }
+        { label: 'Matches', value: s.matches_played || 0 },
+        { label: 'Runs', value: s.total_runs || 0 },
+        { label: 'Bat Avg', value: formatNumber(s.average) },
+        { label: 'Strike Rate', value: formatNumber(s.strike_rate) },
+        { label: 'Wickets', value: s.wickets || 0 },
+        { label: 'Bowl Avg', value: formatNumber(s.bowling_average) },
+        { label: 'Economy', value: formatNumber(s.economy_rate) },
+        { label: 'Catches', value: s.catches || 0 },
     ];
 });
 
-const careerStatsByFormat = computed(() => {
-    return playerData.value?.career_stats_by_format || {
+const careerStatsByFormat = computed(() =>
+    playerData.value?.career_stats_by_format || {
         odi: { matches: 0, runs: 0, average: 0, strike_rate: 0, wickets: 0, bowling_average: 0, economy: 0 },
         t20: { matches: 0, runs: 0, average: 0, strike_rate: 0, wickets: 0, bowling_average: 0, economy: 0 },
         test: { matches: 0, runs: 0, average: 0, strike_rate: 0, wickets: 0, bowling_average: 0, economy: 0 },
-        ipl: { matches: 0, runs: 0, average: 0, strike_rate: 0, wickets: 0, bowling_average: 0, economy: 0 }
-    };
-});
+        ipl: { matches: 0, runs: 0, average: 0, strike_rate: 0, wickets: 0, bowling_average: 0, economy: 0 },
+    }
+);
 
 const filteredMatches = computed(() => {
     if (!playerData.value?.recent_matches) return [];
-
-    if (matchesFilter.value === 'all') {
-        return playerData.value.recent_matches;
-    }
-
-    return playerData.value.recent_matches.filter(match => {
-        return match.format === matchesFilter.value;
-    });
+    if (matchesFilter.value === 'all') return playerData.value.recent_matches;
+    return playerData.value.recent_matches.filter(m => m.format === matchesFilter.value);
 });
 
-const toggleFollow = () => {
-    isFollowing.value = !isFollowing.value;
-};
-
-const calculateAge = (birthDate) => {
-    if (!birthDate) return 'N/A';
-    const birth = new Date(birthDate);
+// ── Helpers ────────────────────────────────────────────────────────────────
+const calculateAge = (dateString) => {
+    if (!dateString) return 'N/A';
+    const birth = new Date(dateString);
     const today = new Date();
     let age = today.getFullYear() - birth.getFullYear();
     const m = today.getMonth() - birth.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
-        age--;
-    }
-    return age + ' years';
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+    return age;
 };
 
 const formatNumber = (num) => {
@@ -296,478 +734,64 @@ const formatNumber = (num) => {
 
 const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
+    return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'short', day: 'numeric'
     });
 };
 
 const formatStyle = (style) => {
-    if (!style) return 'N/A';
-    return style.split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
+    if (!style) return '';
+    return style.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 };
 
 const getFormClass = (performance) => {
-    const runs = performance.runs_scored || 0;
-    const wickets = performance.wickets_taken || 0;
-
-    if (runs >= 50 || wickets >= 3) return 'form-excellent';
-    if (runs >= 30 || wickets >= 2) return 'form-good';
-    if (runs >= 10 || wickets >= 1) return 'form-average';
-    return 'form-poor';
+    const runs = performance?.runs_scored || 0;
+    const wkts = performance?.wickets_taken || 0;
+    if (runs >= 50 || wkts >= 3) return 'bg-emerald-500';
+    if (runs >= 30 || wkts >= 2) return 'bg-blue-500';
+    if (runs >= 10 || wkts >= 1) return 'bg-amber-500';
+    return 'bg-red-400';
 };
 
-const retryLoading = async () => {
+// ── Data loading ───────────────────────────────────────────────────────────
+const loadPlayer = async (slug) => {
+    loading.value = true;
     error.value = false;
-    playerData.value = await fetchPlayerDetail(playerSlug);
-};
-
-onMounted(async () => {
+    playerData.value = null;
     try {
-        loading.value = true;
-        console.log("Calling API...");
-        const data = await fetchPlayerDetail(playerSlug);
-        console.log("API returned:", data);
-
+        const data = await fetchPlayerDetail(slug);
         if (data) {
             playerData.value = data;
-            console.log("Data set successfully");
+            activeTab.value = 'overview';
         } else {
             error.value = true;
             errorMessage.value = 'Player not found';
         }
     } catch (err) {
-        console.error("Error:", err);
+        console.error('Error loading player profile:', err);
         error.value = true;
         errorMessage.value = err.message || 'Failed to load player';
     } finally {
         loading.value = false;
-        console.log("Loading set to false");
     }
-});
+};
 
-watch(() => route.params.slug, async (newSlug) => {
-    if (newSlug) {
-        loading.value = true;
-        playerData.value = await fetchPlayerDetail(newSlug);
-    }
+const retryLoading = () => loadPlayer(playerSlug);
+
+onMounted(() => loadPlayer(playerSlug));
+
+watch(() => route.params.slug, (newSlug) => {
+    if (newSlug) loadPlayer(newSlug);
 });
 </script>
 
 <style scoped>
-.player-header{
-    background-color: #2f0b15;
-}
-.player-profile {
-    min-height: 100vh;
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
 }
 
-/* Loading styles */
-.loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 4rem;
-}
-
-.loading-spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #3498db;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-/* Error styles */
-.error-container {
-    text-align: center;
-    padding: 4rem;
-}
-
-.error-message {
-    color: #e74c3c;
-    margin-bottom: 1rem;
-}
-
-.btn-retry {
-    background: #3498db;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-/* Not found styles */
-.not-found-container {
-    text-align: center;
-    padding: 4rem;
-}
-
-.btn-home {
-    display: inline-block;
-    margin-top: 1rem;
-    padding: 0.5rem 1rem;
-    background: #3498db;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-}
-
-/* Profile header styles */
-.profile-header {
-    position: relative;
-    color: white;
-    padding: 2rem;
-    overflow: hidden;
-    min-height: 200px;
-}
-
-.header-background-pattern {
-    position: absolute;
-    opacity: 0.1;
-    font-size: 15rem;
-    font-weight: bold;
-    right: 5%;
-    bottom: -30%;
-}
-
-.header-content {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-    position: relative;
-    flex-wrap: wrap;
-}
-
-.player-avatar {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    border: 4px solid white;
-    background: #f0f0f0;
-    object-fit: cover;
-}
-
-.player-vitals h1 {
-    margin: 0;
-    font-size: 2rem;
-}
-
-.player-meta {
-    margin: 0.5rem 0;
-    opacity: 0.9;
-}
-
-.btn-follow {
-    background: white;
-    color: #333;
-    border: none;
-    padding: 0.5rem 1.5rem;
-    border-radius: 20px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 0.5rem;
-}
-
-/* Tab styles */
-.profile-tabs {
-    display: flex;
-    border-bottom: 1px solid #e5e7eb;
-    background: white;
-    overflow-x: auto;
-}
-
-.profile-tabs button {
-    padding: 1rem 1.5rem;
-    background: none;
-    border: none;
-    border-bottom: 3px solid transparent;
-    white-space: nowrap;
-    cursor: pointer;
-}
-
-.profile-tabs button.active {
-    border-bottom-color: #3b82f6;
-    font-weight: bold;
-    color: #3b82f6;
-}
-
-/* Tab content */
-.tab-content {
-    padding: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-/* Overview grid */
-.overview-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.stat-card {
-    text-align: center;
-    padding: 1.5rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
-    background: white;
-}
-
-.stat-value {
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: #333;
-}
-
-.stat-label {
-    font-size: 0.9rem;
-    color: #666;
-    margin-top: 0.5rem;
-}
-
-/* Recent form */
-.recent-form {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    border: 1px solid #e5e7eb;
-    grid-column: 1 / -1;
-}
-
-.form-chart {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.form-point {
-    flex: 1;
-    padding: 1rem;
-    text-align: center;
-    border-radius: 4px;
-    font-size: 0.9rem;
-}
-
-.form-excellent {
-    background: #10b981;
-    color: white;
-}
-
-.form-good {
-    background: #3b82f6;
-    color: white;
-}
-
-.form-average {
-    background: #f59e0b;
-    color: white;
-}
-
-.form-poor {
-    background: #ef4444;
-    color: white;
-}
-
-/* Career stats */
-.career-stats {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    border: 1px solid #e5e7eb;
-}
-
-.format-filters {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-}
-
-.format-filters button {
-    padding: 0.5rem 1rem;
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.format-filters button.active {
-    background: #3b82f6;
-    color: white;
-    border-color: #3b82f6;
-}
-
-.stats-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.stats-table th,
-.stats-table td {
-    padding: 0.75rem;
-    text-align: center;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.stats-table th {
-    background: #f9fafb;
-    font-weight: 600;
-}
-
-/* Matches section */
-.matches-section {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    border: 1px solid #e5e7eb;
-}
-
-.matches-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-}
-
-.matches-filter {
-    padding: 0.5rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
-}
-
-.match-list {
-    list-style: none;
-    padding: 0;
-}
-
-.match-item {
-    padding: 1rem;
-    border-bottom: 1px solid #e5e7eb;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.match-item:last-child {
-    border-bottom: none;
-}
-
-.match-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.match-teams {
-    font-weight: 600;
-}
-
-.match-date {
-    font-size: 0.9rem;
-    color: #666;
-}
-
-.match-performance {
-    display: flex;
-    gap: 1rem;
-}
-
-.performance-runs,
-.performance-wickets {
-    padding: 0.25rem 0.5rem;
-    background: #f3f4f6;
-    border-radius: 4px;
-    font-size: 0.9rem;
-}
-
-/* Player info */
-.player-info-grid {
-    display: grid;
-    gap: 2rem;
-}
-
-.info-section {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    border: 1px solid #e5e7eb;
-}
-
-.info-item {
-    margin-bottom: 1rem;
-    display: flex;
-}
-
-.info-item strong {
-    min-width: 150px;
-    color: #666;
-}
-
-.player-bio {
-    line-height: 1.6;
-    color: #555;
-}
-
-/* No data messages */
-.no-data,
-.no-matches {
-    color: #666;
-    font-style: italic;
-    text-align: center;
-    padding: 1rem;
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-    .header-content {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .overview-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .profile-tabs {
-        flex-wrap: wrap;
-    }
-
-    .profile-tabs button {
-        flex: 1;
-        min-width: 100px;
-        text-align: center;
-    }
-
-    .match-item {
-        flex-direction: column;
-        gap: 0.5rem;
-        text-align: center;
-    }
-
-    .info-item {
-        flex-direction: column;
-    }
-
-    .info-item strong {
-        min-width: auto;
-        margin-bottom: 0.25rem;
-    }
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 </style>
