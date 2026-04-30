@@ -9,6 +9,7 @@ export default {
         detail: (slug) => `/matches/detail/${slug}`,
         teamInfo: (id) => `/matches/detail/team-info/${id}`,
         yetToBat: (id) => `/matches/yet-to-bat/${id}`,
+        headToHead: (id) => `/matches/head-to-head/${id}`,
     },
     tournaments: {
         all: "/tournaments",
@@ -37,6 +38,14 @@ export default {
         login: "/auth/login",
         register: "/auth/register",
         profile: "/auth/profile",
+    },
+    playerAuth: {
+        login: "/player/login",
+        logout: "/player/logout",
+        profile: "/player/profile",
+        summary: "/player/stats/summary",
+        matches: "/player/stats/matches",
+        tournaments: "/player/stats/tournaments",
     },
     news: {
         all: "/news",

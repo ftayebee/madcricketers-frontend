@@ -84,6 +84,16 @@ export const fetchMatchScorecard = async (payload) => {
     }
 }
 
+export const fetchHeadToHead = async (matchId) => {
+    try {
+        const res = await apiClient.get(endpoints.matches.headToHead(matchId))
+        return res.data?.data || null
+    } catch (error) {
+        console.error(`Failed to load H2H for match ${matchId}:`, error)
+        return null
+    }
+}
+
 export const fetchYetToBat = async (id) => {
     try {
         const res = await apiClient.get(endpoints.matches.yetToBat(id));

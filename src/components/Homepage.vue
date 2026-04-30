@@ -298,7 +298,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import MatchRow from './includes/MatchRow.vue'
 import TournamentCard from './includes/TournamentCard.vue'
 import bgHome from './../assets/bg/bg-home.png'
@@ -320,6 +320,9 @@ const completedError = ref(false)
 const tournamentsLoading = ref(true)
 const tournamentsError = ref(false)
 
+let livePollingInterval = null
+const LIVE_POLL_MS = 10000 // 10 seconds
+
 // Hero shows live first, falls back to upcoming
 const heroMatches = computed(() =>
     liveMatches.value.length > 0 ? liveMatches.value : upcomingMatches.value
@@ -329,6 +332,28 @@ const heroMatches = computed(() =>
 const abbr = (name) => getTeamAbbreviation(name)
 const hideImg = (e) => { e.target.style.display = 'none' }
 
+// Refresh only live match scores (called by polling interval)
+const refreshLiveScores = async () => {
+    try {
+        const fresh = await fetchLiveMatches()
+        liveMatches.value = fresh
+        // If there are no longer any live matches, clear the poll
+        if (!fresh || fresh.length === 0) stopLivePolling()
+    } catch { /* silent – don't reset scores on transient error */ }
+}
+
+const startLivePolling = () => {
+    if (livePollingInterval) return  // already running
+    livePollingInterval = setInterval(refreshLiveScores, LIVE_POLL_MS)
+}
+
+const stopLivePolling = () => {
+    if (livePollingInterval) {
+        clearInterval(livePollingInterval)
+        livePollingInterval = null
+    }
+}
+
 // Data fetch
 onMounted(async () => {
     // Hero: fetch live + upcoming in parallel
@@ -336,6 +361,8 @@ onMounted(async () => {
         const [live, upcoming] = await Promise.all([fetchLiveMatches(), fetchUpcomingMatches()])
         liveMatches.value = live
         upcomingMatches.value = upcoming
+        // Only start polling if there are live matches right now
+        if (live && live.length > 0) startLivePolling()
     } catch {
         heroError.value = true
     } finally {
@@ -361,4 +388,6 @@ onMounted(async () => {
         tournamentsLoading.value = false
     }
 })
+
+onUnmounted(stopLivePolling)
 </script>

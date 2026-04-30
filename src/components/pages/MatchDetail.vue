@@ -223,7 +223,7 @@
             <!-- Tab bar: 3 equal cols, no scroll ever -->
             <div class="border-t border-white/10">
                 <div class="container mx-auto px-0 max-w-3xl">
-                    <div class="grid grid-cols-3">
+                    <div :class="tabs.length === 3 ? 'grid grid-cols-3' : 'grid grid-cols-2'">
                         <button v-for="tab in tabs" :key="tab" @click="activeTab = tab"
                             :class="['py-3 text-xs sm:text-sm font-semibold text-center transition border-b-2 flex items-center justify-center gap-1.5',
                                 activeTab === tab
@@ -289,7 +289,12 @@ const bowler       = ref({})
 const currentOver  = ref({})
 const probability  = ref({})
 const yetToBatList = ref({})
-const tabs         = ['Match Info', 'Live', 'Scorecard']
+// Live tab is only shown when match is live
+const tabs = computed(() => {
+    const base = ['Match Info', 'Scorecard']
+    if (match.value?.status === 'live') return ['Match Info', 'Live', 'Scorecard']
+    return base
+})
 const activeTab    = ref('Match Info')
 const channel      = ref(null)
 const match_id     = route.params.id
@@ -297,7 +302,13 @@ const tossNotified = ref(false)
 const loadingLiveData = ref(false)
 
 // ── Total overs for the match format ──────────────────────────────
-const totalOvers = computed(() => Number(match.value?.total_overs || match.value?.overs || 20))
+// max_overs is the actual CricketMatch model field (default 20 in DB)
+const totalOvers = computed(() => Number(
+    match.value?.max_overs ||
+    match.value?.total_overs ||
+    match.value?.overs ||
+    20
+))
 
 // ── Current running innings ───────────────────────────────────────
 const currentInnings = computed(() => {
@@ -562,7 +573,15 @@ onMounted(async () => {
 })
 
 watch(() => match.value?.id,     (id) => { if (id) setupRealTimeListeners() })
-watch(() => match.value?.status, (s)  => { if (s === 'live') activeTab.value = 'Live' })
+watch(() => match.value?.status, (s)  => {
+    if (s === 'live') activeTab.value = 'Live'
+    // If status changes away from live and current tab is Live, fall back gracefully
+    else if (activeTab.value === 'Live') activeTab.value = 'Scorecard'
+})
+// Guard: if someone deep-links to Live tab for a non-live match, redirect to Scorecard
+watch(tabs, (newTabs) => {
+    if (!newTabs.includes(activeTab.value)) activeTab.value = newTabs[0]
+})
 onUnmounted(cleanupRealTimeListeners)
 </script>
 

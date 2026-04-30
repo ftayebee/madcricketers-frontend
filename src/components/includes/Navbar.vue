@@ -25,10 +25,10 @@
                     class="btn-cta-primary text-sm px-4 py-1.5 rounded-lg font-semibold transition-all whitespace-nowrap">
                     Registration
                 </router-link>
-                <a href="https://app.madcricketers.com/" target="_blank"
+                <button type="button" @click="openLoginChooser"
                     class="btn-cta-outline text-sm px-4 py-1.5 rounded-lg font-semibold transition-all whitespace-nowrap">
                     Login
-                </a>
+                </button>
             </div>
 
             <!-- Mobile: right side = hamburger only -->
@@ -62,10 +62,43 @@
                         class="btn-cta-primary text-sm text-center py-2.5 rounded-lg font-semibold transition-all">
                         Registration
                     </router-link>
-                    <a href="https://app.madcricketers.com/" target="_blank"
+                    <button type="button" @click="openLoginChooser"
                         class="btn-cta-outline text-sm text-center py-2.5 rounded-lg font-semibold transition-all">
-                        Admin Login
-                    </a>
+                        Login
+                    </button>
+                </div>
+            </div>
+        </transition>
+
+        <transition name="fade">
+            <div v-if="isLoginChooserOpen" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/60 px-4"
+                @click.self="closeLoginChooser">
+                <div class="w-full max-w-md rounded-3xl bg-white p-5 shadow-2xl">
+                    <div class="mb-4 flex items-start justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-[0.22em] text-red-600">Choose login</p>
+                            <h2 class="mt-1 text-2xl font-black text-slate-900">Where do you want to go?</h2>
+                        </div>
+                        <button class="rounded-full bg-slate-100 px-3 py-1 text-xl leading-none text-slate-500" @click="closeLoginChooser">&times;</button>
+                    </div>
+                    <div class="grid gap-3">
+                        <a href="https://app.madcricketers.com/login"
+                            class="login-choice border-slate-200 hover:border-red-300 hover:bg-red-50">
+                            <span class="choice-icon bg-slate-900 text-white">A</span>
+                            <span>
+                                <span class="block font-black text-slate-900">Admin Login</span>
+                                <span class="text-sm text-slate-500">Open app.madcricketers.com admin panel</span>
+                            </span>
+                        </a>
+                        <router-link to="/player-login" class="login-choice border-red-200 bg-red-50 hover:bg-red-100"
+                            @click="closeLoginChooser">
+                            <span class="choice-icon bg-red-600 text-white">P</span>
+                            <span>
+                                <span class="block font-black text-slate-900">Player Login</span>
+                                <span class="text-sm text-slate-500">Login to profile, stats and match history</span>
+                            </span>
+                        </router-link>
+                    </div>
                 </div>
             </div>
         </transition>
@@ -78,6 +111,7 @@ import mainLogo from '../../assets/main-logo-dark.png'
 
 const isMenuOpen = ref(false)
 const isSticky = ref(false)
+const isLoginChooserOpen = ref(false)
 
 const navLinks = [
     { path: '/', label: 'Home' },
@@ -89,6 +123,11 @@ const navLinks = [
 
 const toggleMenu = () => { isMenuOpen.value = !isMenuOpen.value }
 const closeMenu = () => { isMenuOpen.value = false }
+const openLoginChooser = () => {
+    closeMenu()
+    isLoginChooserOpen.value = true
+}
+const closeLoginChooser = () => { isLoginChooserOpen.value = false }
 
 const handleScroll = () => { isSticky.value = window.scrollY > 40 }
 
@@ -134,5 +173,37 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 .slide-down-leave-to {
     opacity: 0;
     transform: translateY(-8px);
+}
+
+.login-choice {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 18px;
+    padding: 16px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.choice-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
 }
 </style>
